@@ -1,0 +1,938 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Depth of Science</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Tamil:wght@400;500;700;800&family=Noto+Sans+Sinhala:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Layout concept: the page descends like a dive. A sticky gauge reads out depth in metres as you scroll;
+     the hero shows the real ocean zones as a column of bands. English and Tamil share one layout. */
+  :root {
+    --font-display: "Bricolage Grotesque", "Noto Sans Tamil", "Noto Sans Sinhala", "Segoe UI", system-ui, sans-serif;
+    --font-body: "IBM Plex Sans", "Noto Sans Tamil", "Noto Sans Sinhala", "Segoe UI", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", "Noto Sans Tamil", "Noto Sans Sinhala", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+    --bg: #eef5f6;
+    --panel: #e1edef;
+    --fg: #0a2a33;
+    --muted: #46656d;
+    --line: #c3d8dc;
+    --accent: #0b7a85;
+    --accent-fg: #ffffff;
+    --head: rgba(238, 245, 246, 0.92);
+
+    --z1: #bfe6ea; --zt1: #0a2a33;
+    --z2: #7cc3cc; --zt2: #0a2a33;
+    --z3: #3f8f9c; --zt3: #04202a;
+    --z4: #1f5a6b; --zt4: #ffffff;
+    --z5: #0f3345; --zt5: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #061a21; --panel: #0a2630; --fg: #ddedf0; --muted: #8fb0b8; --line: #17404c;
+      --accent: #4fd1c5; --accent-fg: #04252b; --head: rgba(6, 26, 33, 0.92);
+      --z1: #0f4b57; --zt1: #cfe6ea; --z2: #0b3a47; --zt2: #cfe6ea; --z3: #082c38; --zt3: #cfe6ea;
+      --z4: #061f29; --zt4: #cfe6ea; --z5: #04151d; --zt5: #cfe6ea;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #061a21; --panel: #0a2630; --fg: #ddedf0; --muted: #8fb0b8; --line: #17404c;
+    --accent: #4fd1c5; --accent-fg: #04252b; --head: rgba(6, 26, 33, 0.92);
+    --z1: #0f4b57; --zt1: #cfe6ea; --z2: #0b3a47; --zt2: #cfe6ea; --z3: #082c38; --zt3: #cfe6ea;
+    --z4: #061f29; --zt4: #cfe6ea; --z5: #04151d; --zt5: #cfe6ea;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.6;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+    z-index: 10; background: var(--head);
+  }
+  .wrap {
+    max-width: 1080px; margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+  /* Header: brand, live depth gauge, language switch, join */
+  header {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9;
+    background: var(--head); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 14px; padding-block: 10px; }
+  .brand { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; text-decoration: none; white-space: nowrap; }
+  .gauge {
+    font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted);
+    display: flex; align-items: baseline; gap: 8px; font-variant-numeric: tabular-nums; margin-left: auto;
+  }
+  .gauge b { color: var(--fg); font-weight: 500; min-width: 7ch; text-align: right; display: inline-block; }
+  .gauge .zone { display: none; }
+  @media (min-width: 760px) { .gauge .zone { display: inline; } }
+  .tools { display: flex; align-items: center; gap: 10px; }
+  .lang { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .lang button {
+    font-family: var(--font-body); font-size: 0.85rem; font-weight: 600; color: var(--muted);
+    background: transparent; border: 0; padding: 7px 12px; cursor: pointer;
+  }
+  .lang button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    background: var(--accent); color: var(--accent-fg);
+    font-family: var(--font-display); font-weight: 700; font-size: 1rem;
+    padding: 14px 22px; border-radius: 10px; text-decoration: none; border: 0; cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn.small { padding: 8px 14px; font-size: 0.9rem; border-radius: 8px; }
+  .btn svg { width: 20px; height: 20px; flex: none; }
+  .ghost { color: var(--fg); background: transparent; border: 1px solid var(--line); }
+  @media (max-width: 560px) { .btn.small { display: none; } }
+
+  /* Hero */
+  .hero { padding-block: 56px 72px; }
+  .hero-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 48px; align-items: center; }
+  .hero-grid > * { min-width: 0; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin: 0 0 16px; }
+  h1 {
+    font-family: var(--font-display); font-weight: 800; font-size: clamp(2.3rem, 7vw, 4.4rem);
+    line-height: 1.02; letter-spacing: -0.03em; margin: 0 0 22px; text-wrap: balance;
+  }
+  .lede { font-size: 1.15rem; color: var(--muted); max-width: 50ch; margin: 0 0 28px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+  .strata { display: flex; flex-direction: column; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); }
+  .band { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; padding: 14px 16px; font-family: var(--font-mono); font-size: 0.8rem; min-width: 0; }
+  .band strong { font-family: var(--font-display); font-size: 1rem; font-weight: 700; display: block; }
+  .band span { display: block; }
+  .band small { font-size: 0.75rem; opacity: 0.85; white-space: nowrap; }
+  .b1 { background: var(--z1); color: var(--zt1); min-height: 64px; }
+  .b2 { background: var(--z2); color: var(--zt2); min-height: 84px; }
+  .b3 { background: var(--z3); color: var(--zt3); min-height: 110px; }
+  .b4 { background: var(--z4); color: var(--zt4); min-height: 84px; }
+  .b5 { background: var(--z5); color: var(--zt5); min-height: 84px; }
+  .strata-note { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); margin: 10px 2px 0; }
+
+  /* Sections */
+  section.block { padding-block: 64px; border-top: 1px solid var(--line); }
+  .depth-tag { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); margin: 0 0 10px; letter-spacing: 0.04em; }
+  h2 { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.7rem, 4.5vw, 2.5rem); line-height: 1.12; letter-spacing: -0.02em; margin: 0 0 14px; text-wrap: balance; }
+  .intro { color: var(--muted); max-width: 58ch; margin: 0 0 36px; }
+
+  .subjects { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 28px 24px; }
+  .subject { border-top: 3px solid var(--accent); padding-top: 12px; min-width: 0; }
+  .subject .code { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.1em; color: var(--accent); display: block; margin-bottom: 4px; }
+  .subject h3 { font-family: var(--font-display); font-size: 1.3rem; line-height: 1.25; margin: 0; letter-spacing: -0.01em; }
+
+  .formats { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 28px; }
+  .format { background: var(--panel); border-radius: 14px; padding: 20px 22px; min-width: 0; }
+  .format h3 { font-family: var(--font-display); font-size: 1.1rem; line-height: 1.3; margin: 0 0 6px; }
+  .format p { margin: 0; color: var(--muted); font-size: 0.97rem; }
+  .langs { font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted); margin: 0; }
+
+  .updates { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0 40px; max-width: 880px; }
+  .updates li { padding: 14px 0; border-bottom: 1px solid var(--line); font-family: var(--font-display); font-weight: 600; font-size: 1.1rem; min-width: 0; }
+
+  ol.steps { list-style: none; counter-reset: s; padding: 0; margin: 0 0 36px; display: grid; gap: 18px; max-width: 640px; }
+  ol.steps li { counter-increment: s; display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: start; }
+  ol.steps li::before {
+    content: counter(s); font-family: var(--font-mono); font-weight: 500; width: 44px; height: 44px;
+    display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--accent);
+  }
+  ol.steps strong { display: block; font-family: var(--font-display); }
+  ol.steps span { color: var(--muted); font-size: 0.97rem; }
+
+  .final { background: var(--z5); color: var(--zt5); border-radius: 16px; padding: 40px 28px; margin-top: 8px; }
+  .final h2 { margin-bottom: 10px; }
+  .final p { margin: 0 0 22px; opacity: 0.9; max-width: 50ch; }
+  .final .btn { background: var(--accent); color: var(--accent-fg); }
+
+  footer { border-top: 1px solid var(--line); padding-block: 28px 40px; color: var(--muted); font-size: 0.9rem; }
+  footer .row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; }
+  footer .mono { font-family: var(--font-mono); font-size: 0.78rem; }
+
+  /* Resource library */
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 32px; }
+  .chip {
+    font-family: var(--font-body); font-size: 0.9rem; font-weight: 600; color: var(--fg);
+    background: transparent; border: 1px solid var(--line); padding: 8px 16px; border-radius: 999px; cursor: pointer;
+  }
+  .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .sblock { margin-bottom: 48px; }
+  .sblock > h3 { font-family: var(--font-display); font-size: 1.7rem; line-height: 1.25; margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+  .sblock > h3 .code { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.1em; color: var(--accent); font-weight: 500; }
+  .group { margin-top: 24px; }
+  .group h4 { font-family: var(--font-display); font-size: 1.05rem; line-height: 1.4; margin: 0 0 8px; }
+  .items { display: grid; border-top: 1px solid var(--line); }
+  .item { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 4px; border-bottom: 1px solid var(--line); text-decoration: none; min-width: 0; }
+  .item:hover .go { transform: translateX(3px); }
+  .item .txt { min-width: 0; }
+  .item .nm { font-weight: 500; overflow-wrap: anywhere; }
+  .item .note { display: block; color: var(--muted); font-size: 0.85rem; }
+  .badge { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; color: var(--muted); margin-left: 8px; white-space: nowrap; font-weight: 400; }
+  .go { color: var(--accent); font-weight: 600; white-space: nowrap; display: inline-block; transition: transform 0.15s ease; }
+  .soon { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); margin: 10px 0 0; }
+  html[lang="ta"] .group h4, html[lang="si"] .group h4 { letter-spacing: 0; }
+  @media (prefers-reduced-motion: reduce) { .go { transition: none; } }
+
+  /* Tamil: looser leading, no negative tracking, no forced capitals */
+  html[lang="ta"] body { line-height: 1.75; }
+  html[lang="ta"] h1 { line-height: 1.2; letter-spacing: 0; font-size: clamp(2rem, 6vw, 3.4rem); }
+  html[lang="ta"] h2, html[lang="ta"] h3, html[lang="ta"] .brand { letter-spacing: 0; }
+  html[lang="ta"] h2 { line-height: 1.3; }
+  html[lang="ta"] .eyebrow { letter-spacing: 0.02em; text-transform: none; }
+  html[lang="ta"] .depth-tag { letter-spacing: 0; }
+  /* Sinhala: same treatment as Tamil */
+  html[lang="si"] body { line-height: 1.75; }
+  html[lang="si"] h1 { line-height: 1.2; letter-spacing: 0; font-size: clamp(2rem, 6vw, 3.4rem); }
+  html[lang="si"] h2, html[lang="si"] h3, html[lang="si"] .brand { letter-spacing: 0; }
+  html[lang="si"] h2 { line-height: 1.3; }
+  html[lang="si"] .eyebrow { letter-spacing: 0.02em; text-transform: none; }
+  html[lang="si"] .depth-tag { letter-spacing: 0; }
+
+  @media (max-width: 800px) {
+    .hero { padding-block: 36px 52px; }
+    .hero-grid { grid-template-columns: 1fr; gap: 36px; }
+    section.block { padding-block: 48px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .btn { transition: none; }
+  }
+</style>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="#top">Depth of Science</a>
+    <div class="gauge" aria-hidden="true"><span class="zone" id="zone">Sunlight zone</span><b id="depth">0 m</b></div>
+    <div class="tools">
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" id="lang-en" aria-pressed="true">EN</button>
+        <button type="button" id="lang-ta" aria-pressed="false">தமிழ்</button>
+        <button type="button" id="lang-si" aria-pressed="false">සිංහල</button>
+      </div>
+      <a class="btn small" data-join href="https://whatsapp.com/channel/0029VamYa7D6xCSPUPuZzS1J" target="_blank" rel="noopener" data-i="joinShort">Join channel</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap hero">
+    <div class="hero-grid">
+      <div>
+        <p class="eyebrow" data-i="eyebrow">A/L Science · WhatsApp channel</p>
+        <h1 data-i="h1">The ultimate hub for A/L Science learners.</h1>
+        <p class="lede" data-i="lede">Free notes, past papers and model papers, shared by university-selected Science stream students.</p>
+        <div class="actions">
+          <a class="btn" data-join href="https://whatsapp.com/channel/0029VamYa7D6xCSPUPuZzS1J" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .6l-.4.6c-.1.2-.3.4-.1.7.2.3.8 1.3 1.8 2.1 1.2 1 2.2 1.3 2.5 1.5.3.1.5.1.7-.1l.9-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.6.4.1.1.1.7-.1 1.3Z"/></svg>
+            <span data-i="joinWa">Join on WhatsApp</span>
+          </a>
+          <a class="btn ghost" href="#subjects" data-i="seeSubjects">See subjects</a>
+        </div>
+      </div>
+      <div>
+        <div class="strata" role="img" id="strata" aria-label="The five ocean depth zones, from the sunlit surface down to the deepest trenches">
+          <div class="band b1"><div><strong data-i="z1n">Sunlight zone</strong><span data-i="z1d">Where photosynthesis happens</span></div><small>0–200 m</small></div>
+          <div class="band b2"><div><strong data-i="z2n">Twilight zone</strong><span data-i="z2d">Light fades out</span></div><small>200–1,000 m</small></div>
+          <div class="band b3"><div><strong data-i="z3n">Midnight zone</strong><span data-i="z3d">No sunlight at all</span></div><small>1,000–4,000 m</small></div>
+          <div class="band b4"><div><strong data-i="z4n">Abyssal zone</strong><span data-i="z4d">Near-freezing, crushing pressure</span></div><small>4,000–6,000 m</small></div>
+          <div class="band b5"><div><strong data-i="z5n">Hadal zone</strong><span data-i="z5d">The deepest trenches</span></div><small>6,000–10,935 m</small></div>
+        </div>
+        <p class="strata-note" data-i="strataNote">Ocean zones by depth. The deepest point, Challenger Deep, is about 10,935 m down.</p>
+      </div>
+    </div>
+  </div>
+
+  <section class="block" id="subjects">
+    <div class="wrap">
+      <p class="depth-tag" data-i="subTag">Subjects</p>
+      <h2 data-i="subH">Five A/L subjects, one place.</h2>
+      <p class="intro" data-i="subIntro">Pick your subject and find notes, papers and practice questions for it in the channel.</p>
+      <div class="subjects">
+        <div class="subject"><span class="code">BIO</span><h3 data-i="s1">Biology</h3></div>
+        <div class="subject"><span class="code">CHEM</span><h3 data-i="s2">Chemistry</h3></div>
+        <div class="subject"><span class="code">PHY</span><h3 data-i="s3">Physics</h3></div>
+        <div class="subject"><span class="code">C.MATHS</span><h3 data-i="s4">Combined Maths</h3></div>
+        <div class="subject"><span class="code">ICT</span><h3 data-i="s5">ICT</h3></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="library">
+    <div class="wrap">
+      <p class="depth-tag" data-i="libTag">Resource library</p>
+      <h2 data-i="libH">Open and start studying.</h2>
+      <p class="intro" data-i="libIntro">Files and folders open in Google Drive in a new tab.</p>
+      <div class="filters" role="group" aria-label="Subject filter">
+        <button type="button" class="chip" data-f="all" aria-pressed="true" data-i="fAll">All</button>
+        <button type="button" class="chip" data-f="bio" aria-pressed="false" data-i="s1">Biology</button>
+        <button type="button" class="chip" data-f="chem" aria-pressed="false" data-i="s2">Chemistry</button>
+        <button type="button" class="chip" data-f="phy" aria-pressed="false" data-i="s3">Physics</button>
+        <button type="button" class="chip" data-f="maths" aria-pressed="false" data-i="s4">Combined Maths</button>
+        <button type="button" class="chip" data-f="ict" aria-pressed="false" data-i="s5">ICT</button>
+        <button type="button" class="chip" data-f="gen" aria-pressed="false">General</button>
+      </div>
+      <div id="lib"></div>
+    </div>
+  </section>
+
+  <section class="block" id="materials">
+    <div class="wrap">
+      <p class="depth-tag" data-i="matTag">Free study materials</p>
+      <h2 data-i="matH">Everything you need to revise.</h2>
+      <p class="intro" data-i="matIntro">The study materials in the channel are free.</p>
+      <div class="formats">
+        <div class="format"><h3 data-i="m1n">Structured notes</h3><p data-i="m1d">Topic by topic, easy to revise from.</p></div>
+        <div class="format"><h3 data-i="m2n">Past papers</h3><p data-i="m2d">Practise with real exam questions.</p></div>
+        <div class="format"><h3 data-i="m3n">Model papers</h3><p data-i="m3d">Get used to the format and pace of the exam.</p></div>
+        <div class="format"><h3 data-i="m4n">Term test papers</h3><p data-i="m4d">Check your progress through the year.</p></div>
+        <div class="format"><h3 data-i="m5n">Study guides</h3><p data-i="m5d">Plan what to study and how.</p></div>
+        <div class="format"><h3 data-i="m6n">Practice questions</h3><p data-i="m6d">Extra learning materials to test yourself.</p></div>
+      </div>
+      <p class="langs" data-i="langsNote">Material is shared in English, Tamil and Sinhala.</p>
+    </div>
+  </section>
+
+  <section class="block" id="updates">
+    <div class="wrap">
+      <p class="depth-tag" data-i="updTag">Stay updated</p>
+      <h2 data-i="updH">More than study material.</h2>
+      <p class="intro" data-i="updIntro">Follow the channel for the updates that matter to A/L students.</p>
+      <ul class="updates">
+        <li data-i="u1">Exam timetables</li>
+        <li data-i="u2">Educational opportunities</li>
+        <li data-i="u3">Competitions and challenges</li>
+        <li data-i="u4">Announcements</li>
+        <li data-i="u5">Doubt support</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block" id="join">
+    <div class="wrap">
+      <p class="depth-tag" data-i="joinTag">How to join</p>
+      <h2 data-i="joinH">Three taps to the bottom.</h2>
+      <p class="intro" data-i="joinIntro">You need WhatsApp on your phone.</p>
+      <ol class="steps">
+        <li><div><strong data-i="st1n">Tap the join button</strong><span data-i="st1d">It opens the Depth of Science channel in WhatsApp.</span></div></li>
+        <li><div><strong data-i="st2n">Tap Follow</strong><span data-i="st2d">New posts appear in the Updates tab.</span></div></li>
+        <li><div><strong data-i="st3n">Switch on notifications</strong><span data-i="st3d">Use the bell icon so you do not miss a post.</span></div></li>
+      </ol>
+      <div class="final">
+        <h2 data-i="finalH">Start revising today.</h2>
+        <p data-i="finalP">Follow Depth of Science for free notes, papers and updates.</p>
+        <a class="btn" data-join href="https://whatsapp.com/channel/0029VamYa7D6xCSPUPuZzS1J" target="_blank" rel="noopener" data-i="joinWa">Join on WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="contact">
+    <div class="wrap">
+      <p class="depth-tag" data-i="contactTag">Promotions</p>
+      <h2 data-i="contactH">Promote with us.</h2>
+      <p class="intro" data-i="contactP">Want to promote an educational or career opportunity to A/L students? Message the channel owner on WhatsApp.</p>
+      <a class="btn" href="https://wa.me/94788538904" target="_blank" rel="noopener" data-i="contactBtn">Message on WhatsApp</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap row">
+    <span data-i="foot">Depth of Science · A/L Science learners</span>
+    <span class="mono" id="foot-depth">Sunlight zone · 0 m</span>
+  </div>
+</footer>
+
+<script>
+  // Every Join button reads this one link.
+  var CHANNEL_URL = "https://whatsapp.com/channel/0029VamYa7D6xCSPUPuZzS1J";
+  Array.prototype.forEach.call(document.querySelectorAll("[data-join]"), function (el) { el.href = CHANNEL_URL; });
+
+  var I18N = {
+    en: {
+      unit: "m",
+      strataAria: "The five ocean depth zones, from the sunlit surface down to the deepest trenches",
+      joinShort: "Join channel",
+      eyebrow: "A/L Science · WhatsApp channel",
+      h1: "The ultimate hub for A/L Science learners.",
+      lede: "Free notes, past papers and model papers, shared by university-selected Science stream students.",
+      joinWa: "Join on WhatsApp",
+      seeSubjects: "See subjects",
+      z1n: "Sunlight zone", z1d: "Where photosynthesis happens",
+      z2n: "Twilight zone", z2d: "Light fades out",
+      z3n: "Midnight zone", z3d: "No sunlight at all",
+      z4n: "Abyssal zone", z4d: "Near-freezing, crushing pressure",
+      z5n: "Hadal zone", z5d: "The deepest trenches",
+      strataNote: "Ocean zones by depth. The deepest point, Challenger Deep, is about 10,935 m down.",
+      subTag: "Subjects",
+      subH: "Five A/L subjects, one place.",
+      subIntro: "Pick your subject and find notes, papers and practice questions for it in the channel.",
+      s1: "Biology", s2: "Chemistry", s3: "Physics", s4: "Combined Maths", s5: "ICT",
+      matTag: "Free study materials",
+      matH: "Everything you need to revise.",
+      matIntro: "The study materials in the channel are free.",
+      m1n: "Structured notes", m1d: "Topic by topic, easy to revise from.",
+      m2n: "Past papers", m2d: "Practise with real exam questions.",
+      m3n: "Model papers", m3d: "Get used to the format and pace of the exam.",
+      m4n: "Term test papers", m4d: "Check your progress through the year.",
+      m5n: "Study guides", m5d: "Plan what to study and how.",
+      m6n: "Practice questions", m6d: "Extra learning materials to test yourself.",
+      langsNote: "Material is shared in English, Tamil and Sinhala.",
+      updTag: "Stay updated",
+      updH: "More than study material.",
+      updIntro: "Follow the channel for the updates that matter to A/L students.",
+      u1: "Exam timetables", u2: "Educational opportunities", u3: "Competitions and challenges", u4: "Announcements", u5: "Doubt support",
+      joinTag: "How to join",
+      joinH: "Three taps to the bottom.",
+      joinIntro: "You need WhatsApp on your phone.",
+      st1n: "Tap the join button", st1d: "It opens the Depth of Science channel in WhatsApp.",
+      st2n: "Tap Follow", st2d: "New posts appear in the Updates tab.",
+      st3n: "Switch on notifications", st3d: "Use the bell icon so you do not miss a post.",
+      finalH: "Start revising today.",
+      finalP: "Follow Depth of Science for free notes, papers and updates.",
+      foot: "Depth of Science · A/L Science learners",
+      contactTag: "Promotions",
+      contactH: "Promote with us.",
+      contactP: "Want to promote an educational or career opportunity to A/L students? Message the channel owner on WhatsApp.",
+      contactBtn: "Message on WhatsApp",
+      libTag: "Resource library",
+      libH: "Open and start studying.",
+      libIntro: "Files and folders open in Google Drive in a new tab.",
+      fAll: "All", open: "Open", kFile: "File", kFolder: "Folder"
+    },
+    ta: {
+      unit: "மீ",
+      strataAria: "சூரிய ஒளி படும் மேற்பரப்பு முதல் ஆழமான அகழிகள் வரையிலான ஐந்து கடல் ஆழ மண்டலங்கள்",
+      joinShort: "சேனலில் இணை",
+      eyebrow: "A/L அறிவியல் · வாட்ஸ்அப் சேனல்",
+      h1: "A/L அறிவியல் மாணவர்களுக்கான முழுமையான தளம்.",
+      lede: "இலவசக் குறிப்புகள், கடந்தகால வினாத்தாள்கள், மாதிரி வினாத்தாள்கள் ஆகியவை பல்கலைக்கழகத்துக்குத் தெரிவான விஞ்ஞானப் பிரிவு மாணவர்களால் பகிரப்படுகின்றன.",
+      joinWa: "வாட்ஸ்அப்பில் இணையுங்கள்",
+      seeSubjects: "பாடங்களைப் பார்க்க",
+      z1n: "சூரிய ஒளி மண்டலம்", z1d: "ஒளிச்சேர்க்கை நடக்கும் இடம்",
+      z2n: "அந்தி மண்டலம்", z2d: "ஒளி மங்கத் தொடங்கும்",
+      z3n: "நள்ளிரவு மண்டலம்", z3d: "சூரிய ஒளியே இல்லை",
+      z4n: "ஆழ்கடல் மண்டலம்", z4d: "உறைநிலைக்கு அண்மித்த குளிர், பெரும் அழுத்தம்",
+      z5n: "ஹேடல் மண்டலம்", z5d: "மிக ஆழமான அகழிகள்",
+      strataNote: "ஆழத்தின்படி கடல் மண்டலங்கள். மிக ஆழமான இடமான சலஞ்சர் டீப் சுமார் 10,935 மீ ஆழத்தில் உள்ளது.",
+      subTag: "பாடங்கள்",
+      subH: "ஐந்து A/L பாடங்கள், ஒரே இடத்தில்.",
+      subIntro: "உங்கள் பாடத்தைத் தேர்ந்தெடுத்து, அதற்கான குறிப்புகள், வினாத்தாள்கள், பயிற்சி வினாக்களைச் சேனலில் பெறுங்கள்.",
+      s1: "உயிரியல்", s2: "இரசாயனவியல்", s3: "பௌதிகவியல்", s4: "இணைந்த கணிதம்", s5: "தகவல் தொடர்பாடல் தொழில்நுட்பம் (ICT)",
+      matTag: "இலவசப் படிப்பு உதவிகள்",
+      matH: "திருப்புதலுக்குத் தேவையான அனைத்தும்.",
+      matIntro: "சேனலில் உள்ள படிப்பு உதவிகள் இலவசம்.",
+      m1n: "ஒழுங்கமைக்கப்பட்ட குறிப்புகள்", m1d: "தலைப்பு வாரியாக, திருப்புதலுக்கு எளிதாக.",
+      m2n: "கடந்தகால வினாத்தாள்கள்", m2d: "உண்மையான பரீட்சை வினாக்களுடன் பயிற்சி செய்யுங்கள்.",
+      m3n: "மாதிரி வினாத்தாள்கள்", m3d: "பரீட்சையின் வடிவத்தையும் வேகத்தையும் பழகுங்கள்.",
+      m4n: "தவணைப் பரீட்சை வினாத்தாள்கள்", m4d: "ஆண்டு முழுவதும் உங்கள் முன்னேற்றத்தைச் சரிபாருங்கள்.",
+      m5n: "படிப்பு வழிகாட்டிகள்", m5d: "எதை, எப்படிப் படிப்பது என்று திட்டமிடுங்கள்.",
+      m6n: "பயிற்சி வினாக்கள்", m6d: "உங்களைச் சோதித்துக்கொள்ள கூடுதல் கற்றல் உதவிகள்.",
+      langsNote: "ஆங்கிலம், தமிழ், சிங்களம் ஆகிய மொழிகளில் பகிரப்படுகிறது.",
+      updTag: "தகவல்கள்",
+      updH: "படிப்பு உதவிகளுக்கும் மேலாக.",
+      updIntro: "A/L மாணவர்களுக்குத் தேவையான தகவல்களுக்குச் சேனலைப் பின்தொடருங்கள்.",
+      u1: "பரீட்சை நேரசூசிகள்", u2: "கல்வி வாய்ப்புகள்", u3: "போட்டிகளும் சவால்களும்", u4: "அறிவிப்புகள்", u5: "சந்தேகங்களுக்கு உதவி",
+      joinTag: "இணைவது எப்படி",
+      joinH: "மூன்று தொடுதல்களில் இணையலாம்.",
+      joinIntro: "உங்கள் கைபேசியில் வாட்ஸ்அப் இருக்க வேண்டும்.",
+      st1n: "இணைவதற்கான பொத்தானைத் தொடுங்கள்", st1d: "வாட்ஸ்அப்பில் Depth of Science சேனல் திறக்கும்.",
+      st2n: "Follow ஐத் தொடுங்கள்", st2d: "புதிய பதிவுகள் Updates தத்தலில் தோன்றும்.",
+      st3n: "அறிவிப்புகளை இயக்குங்கள்", st3d: "எந்தப் பதிவையும் தவறவிடாமல் இருக்க மணி ஐகானைப் பயன்படுத்துங்கள்.",
+      finalH: "இன்றே திருப்புதலைத் தொடங்குங்கள்.",
+      finalP: "இலவசக் குறிப்புகள், வினாத்தாள்கள், தகவல்களுக்கு Depth of Science ஐப் பின்தொடருங்கள்.",
+      foot: "Depth of Science · A/L அறிவியல் மாணவர்கள்",
+      contactTag: "விளம்பரம்",
+      contactH: "எங்களுடன் விளம்பரம் செய்யுங்கள்.",
+      contactP: "A/L மாணவர்களுக்கு ஒரு கல்வி அல்லது தொழில் வாய்ப்பை அறிமுகப்படுத்த விரும்புகிறீர்களா? சேனல் உரிமையாளருக்கு வாட்ஸ்அப்பில் செய்தி அனுப்புங்கள்.",
+      contactBtn: "வாட்ஸ்அப்பில் செய்தி அனுப்புங்கள்",
+      libTag: "வளங்கள் நூலகம்",
+      libH: "திறந்து படிக்கத் தொடங்குங்கள்.",
+      libIntro: "கோப்புகளும் கோப்புறைகளும் புதிய தத்தலில் Google Drive இல் திறக்கும்.",
+      fAll: "அனைத்தும்", open: "திற", kFile: "கோப்பு", kFolder: "கோப்புறை"
+    },
+    si: {
+      unit: "මී.",
+      strataAria: "හිරු එළිය වැටෙන මතුපිටේ සිට ගැඹුරුම අගාධ දක්වා සාගර ගැඹුරු කලාප පහ",
+      joinShort: "නාලිකාවට එක්වන්න",
+      eyebrow: "උසස් පෙළ විද්‍යා · WhatsApp නාලිකාව",
+      h1: "උසස් පෙළ විද්‍යා ශිෂ්‍යයන් සඳහා සම්පූර්ණ මධ්‍යස්ථානය.",
+      lede: "විශ්වවිද්‍යාලවලට තෝරාගත් විද්‍යා අංශයේ සිසුන් විසින් බෙදාගන්නා නොමිලේ සටහන්, පසුගිය ප්‍රශ්න පත්‍ර සහ ආදර්ශ ප්‍රශ්න පත්‍ර.",
+      joinWa: "WhatsApp හි එක්වන්න",
+      seeSubjects: "විෂයන් බලන්න",
+      z1n: "හිරු එළිය කලාපය", z1d: "ප්‍රභාසංශ්ලේෂණය සිදුවන තැන",
+      z2n: "සන්ධ්‍යා කලාපය", z2d: "ආලෝකය අඩු වීමට පටන් ගනී",
+      z3n: "මධ්‍යරාත්‍රී කලාපය", z3d: "හිරු එළිය කිසිසේත් නැත",
+      z4n: "අගාධ කලාපය", z4d: "මිදෙන තරම් සීතල, දැඩි පීඩනය",
+      z5n: "හේඩල් කලාපය", z5d: "ගැඹුරුම අගාධ",
+      strataNote: "ගැඹුර අනුව සාගර කලාප. ගැඹුරුම ස්ථානය වන චැලෙන්ජර් ඩීප් මීටර් 10,935ක් පමණ ගැඹුරේ පිහිටා ඇත.",
+      subTag: "විෂයන්",
+      subH: "උසස් පෙළ විෂය පහ, එකම තැනක.",
+      subIntro: "ඔබේ විෂය තෝරාගෙන, එයට අදාළ සටහන්, ප්‍රශ්න පත්‍ර සහ පුහුණු ප්‍රශ්න නාලිකාවෙන් සොයාගන්න.",
+      s1: "ජීව විද්‍යාව", s2: "රසායන විද්‍යාව", s3: "භෞතික විද්‍යාව", s4: "සංයුක්ත ගණිතය", s5: "තොරතුරු හා සන්නිවේදන තාක්ෂණය (ICT)",
+      matTag: "නොමිලේ අධ්‍යයන සම්පත්",
+      matH: "පුනරීක්ෂණයට අවශ්‍ය සියල්ල.",
+      matIntro: "නාලිකාවේ ඇති අධ්‍යයන සම්පත් නොමිලේ ලැබේ.",
+      m1n: "සංවිධානාත්මක සටහන්", m1d: "මාතෘකා අනුව, පුනරීක්ෂණයට පහසු ලෙස.",
+      m2n: "පසුගිය ප්‍රශ්න පත්‍ර", m2d: "සැබෑ විභාග ප්‍රශ්න සමඟ පුහුණු වන්න.",
+      m3n: "ආදර්ශ ප්‍රශ්න පත්‍ර", m3d: "විභාගයේ ආකෘතියට සහ වේගයට හුරු වන්න.",
+      m4n: "වාර පරීක්ෂණ ප්‍රශ්න පත්‍ර", m4d: "වර්ෂය පුරා ඔබේ ප්‍රගතිය පරීක්ෂා කරන්න.",
+      m5n: "අධ්‍යයන මාර්ගෝපදේශ", m5d: "කුමක් කෙසේ ඉගෙන ගන්නදැයි සැලසුම් කරන්න.",
+      m6n: "පුහුණු ප්‍රශ්න", m6d: "ඔබව පරීක්ෂා කරගැනීමට අමතර ඉගෙනුම් සම්පත්.",
+      langsNote: "සම්පත් ඉංග්‍රීසි, දෙමළ සහ සිංහල භාෂාවලින් බෙදාගැනේ.",
+      updTag: "යාවත්කාලීන තොරතුරු",
+      updH: "අධ්‍යයන සම්පත්වලට වඩා වැඩි යමක්.",
+      updIntro: "උසස් පෙළ සිසුන්ට වැදගත් තොරතුරු සඳහා නාලිකාව අනුගමනය කරන්න.",
+      u1: "විභාග කාලසටහන්", u2: "අධ්‍යාපනික අවස්ථා", u3: "තරඟ සහ අභියෝග", u4: "නිවේදන", u5: "සැක දුරු කිරීමට සහාය",
+      joinTag: "එක්වන්නේ කෙසේද",
+      joinH: "තට්ටු තුනකින් එක්වන්න.",
+      joinIntro: "ඔබේ දුරකථනයේ WhatsApp තිබිය යුතුය.",
+      st1n: "එක්වන්න බොත්තම ඔබන්න", st1d: "එය WhatsApp හි Depth of Science නාලිකාව විවෘත කරයි.",
+      st2n: "Follow ඔබන්න", st2d: "නව පළ කිරීම් Updates ටැබයේ දිස්වේ.",
+      st3n: "දැනුම්දීම් සක්‍රීය කරන්න", st3d: "කිසිදු පළ කිරීමක් මග නොහැරීමට සීනුව අයිකනය භාවිතා කරන්න.",
+      finalH: "අදම පුනරීක්ෂණය අරඹන්න.",
+      finalP: "නොමිලේ සටහන්, ප්‍රශ්න පත්‍ර සහ යාවත්කාලීන තොරතුරු සඳහා Depth of Science අනුගමනය කරන්න.",
+      foot: "Depth of Science · උසස් පෙළ විද්‍යා ශිෂ්‍යයන්",
+      contactTag: "ප්‍රවර්ධන",
+      contactH: "අප සමඟ ප්‍රචාරය කරන්න.",
+      contactP: "උසස් පෙළ සිසුන් වෙත අධ්‍යාපනික හෝ වෘත්තීය අවස්ථාවක් ප්‍රචාරය කිරීමට කැමතිද? නාලිකාවේ හිමිකරුට WhatsApp හරහා පණිවිඩයක් යවන්න.",
+      contactBtn: "WhatsApp හරහා පණිවිඩයක් යවන්න",
+      libTag: "සම්පත් පුස්තකාලය",
+      libH: "විවෘත කර ඉගෙනීම අරඹන්න.",
+      libIntro: "ගොනු සහ ෆෝල්ඩර නව ටැබයක Google Drive හි විවෘත වේ.",
+      fAll: "සියල්ල", open: "විවෘත කරන්න", kFile: "ගොනුව", kFolder: "ෆෝල්ඩරය"
+    }
+  };
+  // Resource library. Add new groups or items here; labels carry all three languages.
+  function L(en, ta, si) { return { en: en, ta: ta || en, si: si || en }; }
+  var EN_MED = L("English medium", "ஆங்கில மொழி மூலம்", "ඉංග්‍රීසි මාධ්‍යය");
+  var TA_MED = L("Tamil medium", "தமிழ் மொழி மூலம்", "දෙමළ මාධ්‍යය");
+  var RES = [
+    { id: "bio", nameKey: "s1", code: "BIO", groups: [
+      { t: L("Provincial full papers · Grade 13 · 2025 batch · 3rd term exam",
+             "மாகாண முழு வினாத்தாள்கள் · தரம் 13 · 2025 குழு · 3ஆம் தவணைப் பரீட்சை",
+             "පළාත් සම්පූර්ණ ප්‍රශ්න පත්‍ර · 13 ශ්‍රේණිය · 2025 කණ්ඩායම · 3 වන වාර විභාගය"),
+        soon: L("More papers coming soon.", "மேலும் வினாத்தாள்கள் விரைவில்.", "තවත් ප්‍රශ්න පත්‍ර ඉක්මනින්."),
+        items: [
+          { n: L("Southern Province", "தென் மாகாணம்", "දකුණු පළාත"), m: "EN", k: "folder",
+            note: L("Part 2 only, with marking scheme", "பகுதி 2 மட்டும், புள்ளித்திட்டத்துடன்", "2 වන කොටස පමණි, ලකුණු දීමේ පටිපාටිය සමඟ"),
+            u: "https://drive.google.com/drive/folders/1qYYYRGdHwURPGnqtz93lilYz-cnD8nCJ" },
+          { n: L("Western Province", "மேல் மாகாணம்", "බස්නාහිර පළාත"), m: "EN", k: "file",
+            u: "https://drive.google.com/file/d/1ualaeY5yy63mncJsnt35E0nCzKE0OrQn/view?usp=drivesdk" },
+          { n: L("Sabaragamuwa Province", "சப்ரகமுவ மாகாணம்", "සබරගමුව පළාත"), m: "EN", k: "file",
+            u: "https://drive.google.com/file/d/12jYk6H8i3S8rR1dqC8-SmV8zRaTQZxTO/view?usp=drivesdk" },
+          { n: L("Uva Province", "ஊவா மாகாணம்", "ඌව පළාත"), m: "EN", k: "file",
+            u: "https://drive.google.com/file/d/1ZLejItI3lQvNqqbc17pSdPJV2e7W8zRt/view?usp=drivesdk" }
+        ] }
+    ] },
+    { id: "chem", nameKey: "s2", code: "CHEM", groups: [
+      { t: L("Unit 02 · Structure & Bonding · Tamil medium",
+             "அலகு 02 · கட்டமைப்பும் பிணைப்பும் · தமிழ் மொழி மூலம்",
+             "ඒකකය 02 · ව්‍යුහය සහ බන්ධන · දෙමළ මාධ්‍යය"),
+        items: [
+          { n: L("Theory book", "கோட்பாட்டுப் புத்தகம்", "න්‍යාය පොත"), m: "TA", k: "file",
+            u: "https://drive.google.com/file/d/1Sfzx7kh8b6FjB6C_vmP-xqpo8r0uM1_r/view?usp=drivesdk" },
+          { n: L("Revision book 1 + marking", "திருப்புதல் நூல் 1 + புள்ளித்திட்டம்", "පුනරීක්ෂණ පොත 1 + ලකුණු දීමේ පටිපාටිය"), m: "TA", k: "folder",
+            u: "https://drive.google.com/drive/folders/1qAVtiN8pUmAh3WgFrP4IIRI9H5HhQr53" },
+          { n: L("Revision book 2 + marking", "திருப்புதல் நூல் 2 + புள்ளித்திட்டம்", "පුනරීක්ෂණ පොත 2 + ලකුණු දීමේ පටිපාටිය"), m: "TA", k: "folder",
+            u: "https://drive.google.com/drive/folders/1rcsnJnEd5StxwMCgtuS4uxo7qYQqVlz5" }
+        ] }
+    ] },
+    { id: "phy", nameKey: "s3", code: "PHY", groups: [
+      { t: L("Complete handwritten notes", "முழுமையான கையெழுத்துக் குறிப்புகள்", "සම්පූර්ණ අතින් ලියූ සටහන්"),
+        items: [
+          { n: TA_MED, m: "TA", k: "folder", u: "https://drive.google.com/drive/folders/1JtknF5oD3EaNhZNdEDqxaxReKUH5C1_f" },
+          { n: EN_MED, m: "EN", k: "folder", u: "https://drive.google.com/drive/folders/148fmNsBClujASm-nyYWiPVA86quFbmxl" }
+        ] },
+      { t: L("Physics practical notes", "பௌதிகவியல் செய்முறைக் குறிப்புகள்", "භෞතික විද්‍යා ප්‍රායෝගික සටහන්"),
+        items: [
+          { n: TA_MED, m: "TA", k: "file", u: "https://drive.google.com/file/d/1ukl8Nb7LrLFos4DTzLpvNpQwCbiyWOUO/view?usp=drivesdk" },
+          { n: EN_MED, m: "EN", k: "file", u: "https://drive.google.com/file/d/1-4AVN1tJJPCqAANkgJNDhSL9y7HL9Dk1/view?usp=drivesdk" }
+        ] },
+      { t: L("Practical guide", "செய்முறை வழிகாட்டி", "ප්‍රායෝගික මාර්ගෝපදේශය"),
+        items: [
+          { n: TA_MED, m: "TA", k: "file", u: "https://drive.google.com/file/d/1qorWtWsxk8nXj-QusZn3feW6XPJr7Chb/view?usp=drivesdk" },
+          { n: EN_MED, m: "EN", k: "file", u: "https://drive.google.com/file/d/1YrdekKNp6x7Eo7rJgLkQakMrRGWRKIOn/view?usp=drivesdk" }
+        ] }
+    ] }
+  ];
+
+  // ---- Added resources. Row format: Name|Medium|f(file) d(folder) w(channel post)|id  (labels show in English for all 3 languages)
+  var SK = { maths: "s4", ict: "s5" }, SN = { maths: "Combined Maths", ict: "ICT", gen: "General" }, SC = { maths: "MATHS", ict: "ICT", gen: "GEN" };
+  function url(k, i) {
+    if (i.indexOf("http") === 0) return i;
+    if (k === "f") return "https://drive.google.com/file/d/" + i + "/view?usp=drivesdk";
+    if (k === "d") return "https://drive.google.com/drive/folders/" + i;
+    return "https://whatsapp.com/channel/0029VamYa7D6xCSPUPuZzS1J/" + i;
+  }
+  function add(sid, title, rows) {
+    var s = RES.filter(function (x) { return x.id === sid; })[0];
+    if (!s) { s = { id: sid, nameKey: SK[sid], name: L(SN[sid]), code: SC[sid], groups: [] }; RES.push(s); }
+    s.groups.push({ t: L(title), items: rows.trim().split("\n").map(function (r) {
+      r = r.trim().split("|");
+      return { n: L(r[0]), m: r[1], k: r[2] === "d" ? "folder" : "file", u: url(r[2], r[3]) };
+    }) });
+  }
+
+  // BIOLOGY
+  add("bio", "Past papers + marking schemes", `
+2019–2026 AL full papers + marking|TA|d|1REJU6WgIQTHSmVITZ8fQsy2BZGojlABz
+2019–2026 AL papers + marking|EN|d|1BD83FReF0_T1RIVstmCrjvoDY81pmDVw
+2026 AL batch full papers + marking|TA|d|1YiJsp1Q9AaLRVzHL5gZ9EeKYRNOj5rvl
+Mora A/L papers 2015–2026|TA|d|1fJ7ip0xWp8i3m3c6qYqEOXrRmipQ6Q1p`);
+  add("bio", "FWC term papers + schemes", `
+1st term 2019–2027|TA|d|18dfUUjLO5yOi3OEB-RUCA2u9fOOPZbPg
+1st term 2023–2027|EN|d|16OaZYJlNQo2-DZJDo_b8jS3DdZEWOKIW
+4th term 2020–2025|TA|d|1lmQHThhlk3zVxDFadDm4u6eGobJFF4gQ
+Central Province · Grade 12 · 3rd term (MCQ + essay)|EN|f|1jxvyk7HyewHvRCaEffzt7dsOBRzzy4yk`);
+  add("bio", "Books & practical notes", `
+AL Biology resource book|TA|d|1oCUR2bqw2gBz_JGZUQccpeIr115yO6wO
+Practical guide|TA|f|1u90PvH-5xK_tqNhI332O7m93GKlGH_97
+Practical complete note|TA|f|1k5F5zFwLQzLVj700NxIJSlkgnZbJQ7nC`);
+  add("bio", "Handwritten short notes · English medium", `
+Introduction to Biology|EN|f|1w3SSC3JBherh7z8AH6DXIiQLQoJIQCWm
+Protista & Fungi|EN|f|1kyfRo9uXCb5ERzke11NmiK1oXxJcz5Sz
+Plant form and function|EN|f|1CDjyfQGaI9ycrPXEKwiuVfTExUtJeeCU
+Animal form and function|EN|f|1q-m3ULjupXVYbddY4Cj-sc6U5OxR8LZT
+Unit 5 · Animal form and function (channel post)|EN|w|4041
+Microbiology|EN|f|1TG0dJyY0pm2g2iNlhyR912lj5eWI2XTI
+Invertebrates & Vertebrates|EN|f|1YON9nrc7pNmtocy7QeiyGnum2wkr06rS`);
+  add("bio", "Unit-wise papers", `
+Units 1–10 papers + answers|TA|d|16p1K-9RV2dfE36EaKXrB7mrHiQ_oQY8G
+Unit 02|EN|f|1XJFR-j2jLFOvQKZKXmyUkpjeRVxXhefF
+Unit 03|EN|f|18BNE_RbeEg42mi6stNLbWDaFRIxbW28D
+Unit 04|EN|f|1quBLMlTEMP8g45Hp_7UuEMvUvK_SXwhe
+Unit 05 – 12|EN|f|1GP7K9H3or2eFwTtR6Vc87tOZKopDK_xe
+Unit 05 – 13|EN|f|187YOTdWAZDeII6CfzVmjU10B_TOV2AGI
+Unit 06 & 07|EN|f|1jRZ6TOcyX5vuTtZG2Q6gOZ8m92JcUFMa
+Unit 09|EN|f|1ExhQv6-XlX9GN0lmPTYQUlPvz03Uxclm`);
+  add("bio", "Essays & MCQs", `
+Essay collection|TA|d|14wEZBwuypYSw5FtvGcD57UxQV3el7qQ1
+Essay collection|EN|d|13pMZmk6NzRFpluV-r_YsRGpz57y660n0
+Classified structured essays · Unit 1–10 · 1990–2020|EN|d|1pAB5w5eO1q1L_S4yj0qi7Eyf4uXI7DE5
+Classified MCQs · Unit 2–10 · up to 2020|EN|d|1dYLvXG1W-UdYPaQCINetD9D2amnqueLo
+2000+ classified MCQ book|TA|f|13eHzCWKo6xpaNqIzaQ7bCKJ0x3nquovW`);
+
+  // CHEMISTRY
+  add("chem", "Past papers + marking schemes", `
+2026 AL batch full papers + marking|TA|d|1qdOy1IcCCTGVpAwJihEVoib-f-O3JSry
+Mora A/L papers 2015–2026|TA|d|1qtl5LTAC0YKcqZbk6Mq8s__cpUXNd4kI
+2027 full papers (Amila Sir) · FP 1 – 9 + marking|TA·EN|w|4208
+2027 full papers (Amila Sir) · FP 10 + marking|TA·EN|d|1JwjADXwEX2O17XUclTH0x6w2OHxRdm1e
+FWC 1st term 2021–2027 (marking in English)|TA·EN|d|1TU3x2eOcK1BLwetwor6OTYP5EHao3iRz
+FWC 4th term 2019–2025 (marking in English)|TA|d|1ZfA1WVYFM5TgnjARFP2_Y6mIJ2gRpvdE
+Central Province · Grade 12 · 3rd term (MCQ + essay)|EN|f|11Kdli8ReaEafI0APmjHz2rFo5dnuHXEa
+2000+ classified MCQ book|TA|d|1BU2qC0gfVAUmyW0k1j0v6B2z-CKut3u0`);
+  add("chem", "Complete handwritten notes · Tamil medium", `
+Atomic Structure|TA|f|1HZXT3zpYddDPau07fxL_XPtgWB3pUskg
+Structure and Bonding|TA|f|1syYSJNydieiVObBWHB3Xe082xcABIh_B
+Chemical Calculation|TA|f|1nyAqH_9lE-yXhuuuBk7D_4Ulsc-_nUpu
+Gases|TA|f|1XE-PdSQpXDp_jE2so6pgzcDl4SS6byYT
+Energetics|TA|f|1A5erncAlm8iXe12_vHKgEOaMX7eAlLvs
+Inorganic Chemistry|TA|f|1ZZaOmfLwDB5fq-FRdqeShQQmmziGvKWb
+Organic Chemistry|TA|f|1_zTcUoKVQFbO8BkEY80CYRYuG2PEHQJU
+Chemical Kinetics|TA|f|1JL77KT9g6vGdV_PKR0ALbkyJhZzPSAn6
+Equilibrium|TA|d|14Rk5SIJfxwU3GFilhih5hDkikMwlFy-c
+Electrochemistry|TA|f|18Q9gOqLEiWYMevQLAD9i7y9gh4s1qN6c`);
+  add("chem", "Complete handwritten notes · English medium", `
+Atomic Structure|EN|f|1Lh8dQUfmOW7wUqJmjHyIesGFYG2jm8ku
+Structure and Bonding|EN|f|1TTOeJXpvsOCrGpZPkJEINDh6Nnl75kfa
+Chemical Calculation|EN|f|1G95RJ-vwAlr7lLJ6h9Wb8ljETDBi9wbQ
+Energetics|EN|f|1kAW5_lxVyQdZkr_T209YZCeiALHzkAN_
+Inorganic Chemistry|EN|f|1SueaJDidZpb_1x2vbFPOLqgbOLEQM2Eh
+Organic Chemistry|EN|d|1gUlDS6X-HGevYSERKDnKRM_rukIjl6Pe
+Chemical Kinetics|EN|f|1poFWWprFu_LkuoqV-0_SSNszC24PqR0G
+Equilibrium|EN|f|1XMMRN5tkHe2hMogEvsjybjyVHfMkuL9O
+More notes · Section 01|EN|d|1GrdH4XugAKPkWWvwr6z9MMh8zQUFp_2a
+More notes · Section 02|EN|w|4080`);
+  add("chem", "Amila Sir · Tamil medium theory books", `
+Unit 01 · Periodic Trends|TA|f|1ULK3Hn-7ZH-_IV2mcLLp17_92q7R-4E4
+Unit 04|TA|d|1iDhciwCWkJsp-AXTo8EP36tlEwgOvJVD`);
+  add("chem", "Unit 02 & 03 · Bonding, Calculation, Redox", `
+Unit 02 quick recap · Primary & secondary interactions|TA·EN|w|4116
+Unit 03 revision books with practice Q&A|TA·EN|d|1aygmUQnvnyFsFOjnunrM-f8lTj8inb3f
+Unit 03 Redox revision book|TA|f|13YVrE-SfDLKl571ni2Xxc9aiQmc1Np8J
+Unit 03 Redox revision book|EN|f|1x3U5Y2jfXLUKVibnF6fbcsTUf5VkIlBa
+Redox completed tute|EN|f|1HSu2zPYYyAzzweX8_gF8Dj-7pyHpeugk`);
+  add("chem", "Unit 06 · Inorganic Chemistry", `
+Inorganic Night completed tute (Amila Sir)|EN|f|1KTLm9rPkmDoGO_g8tGA7ajsJiGLKTlMc
+Inorganic Night tute|EN|f|1r5hgj0Vxo2a3WntO9qp-rCJNcHdL7HIg
+Completed note|TA|f|1cr7U3NlYMIh4668AXNUZN_-IO6FM5qvL
+Complete short note|EN|f|1P_1XXMSbkCImugTuFpRUggVtQs8QoN_q
+Special short note|EN|f|17USv9l6RPVhVWTUY3zZxmhE3VhE54xA9
+Complete notes · groups, d/s-block, qualitative analysis|EN|d|1kpOJ4Xzg_9gl-ISf8U9YC8XUbqYPbpkb`);
+  add("chem", "Unit 07–10 · Organic Chemistry", `
+Theory books 1–3 (Amila Sir)|TA·EN|d|1fWD8UAxFGPdJY0OTv4CPaqwKghUWu02n
+Organic conversion practice sets|TA·EN|d|1A6lREj-PhvDkSWnMQ7MRAa2epbPA4pj
+Organic reactions (summary)|TA·EN|d|14qyRksgDKowa-IiF3OxaEjmd9vLG084v
+Organic mechanisms|TA·EN|d|1pXIe-G-619Wgz72N1aYBYVAHbOfyjTQE
+Organic reactions chart|TA·EN|f|1rd_11WVe6-tcb9xnkXnNzv_Rl683XOJx
+Organic identification tests|TA·EN|f|1AmDuQha-ThJ9AHE-f4sSLzpRh-8KIOTw
+Organic explanation workbook|EN|f|1u611_9VDf8oSC8dRDWJPSTI6RRcdkcl3
+Workbook completed tute|EN|f|1rCwQ_I339Dfdur8G5RaMw4r8QoNJFd7c
+Short notes 1|TA|f|1KkwWLZOv3b7QPExLU5-foEii1oMv4Re2
+Short notes 2|TA|f|1GdQFU-XmT8xN-Ns0g6--Ezclu4nUNyxZ
+Organic reactions 1|TA|f|1CzjVqCOyThRTxrdAl5f7CJpKW06cI_R5
+Organic reactions 2|TA|f|1HGwtajJBMndQ2RJTUJ7acq_5i7Pae1oA`);
+  add("chem", "Unit 11 · Chemical Kinetics (Amila Sir)", `
+Handwritten note|EN|f|1FnL0rNeUqXSdFxh29Vab06sX7Sdbmipn
+Short note|EN|f|18-VrSkEAcAs-MjtUuPhkkRKUfNmBfZ95
+Past paper MCQs|EN|f|1ga2us70Fa1RjHbSw5UvCUGclXM4aIqD7
+MCQ points|EN|f|12Osq_tb9qfVKNWPCT5ZsfmRd-EMjgBaU`);
+  add("chem", "Unit 13 · Electrochemistry (Amila Sir)", `
+Theory book|TA|f|1Fu2VjPhAPCjZ06tEh8RUUgl-NTBoQG9A
+Theory book|EN|f|1_I1qFTS_M8HSsZPqKO-QqEascbKC7WaL
+Completed theory tute|EN|f|1NLB_uwkMsKc-Jn6HisxWOpp5BpMbbIxN
+Past paper MCQs 2019–2025 with answers|TA·EN|d|1-S0lhbiYFHoNqTaQX7Dfo0wRQOJj9ARn`);
+  add("chem", "Industrial Chemistry · English medium", `
+Theory books|EN|d|1i19sacBMim_zo6hLvzAITKoBb_xg-DVb
+Review book|EN|f|1-IQfYUOelutbY9Utx4EXx72yVe9KIkz0
+MCQ points|EN|d|1otAD88DcCHLW53xjrbsZ-gzTo1BdH_t3
+Production short notes|EN|f|1K-yf_VaVQU4dryfdVhosW2M0Rtk2lFiy`);
+  add("chem", "Coordinate Complexes", `
+Past paper essay questions 2015–2024|EN|f|1WofV3VP50l1NJ1R-8qsgxcfUVouMhyIb
+Answers to the essay questions|EN|f|19AdjF9AIx58MCny9_Z6YSJYQJmIuH-4T`);
+
+  // PHYSICS
+  add("phy", "Past papers + marking schemes", `
+2026 AL batch full papers + marking|TA|d|1MQ1PcasUC7nNXJliivCp2xO-VIscIsNS
+Mora A/L papers 2015–2026|TA|d|1OCwA88oPGRO7n3YK_uaNkosy66EPR-yI
+FWC 1st term 2019–2027 (few markings in English)|TA|d|1aaWQ26JEDFacG7ZiplJm-KD05qll4h1C
+FWC 1st term 2023–2027|EN|d|1lbe3VFJp3EDjXWE6ZSLUHQPjRmUp5i8V
+FWC 4th term 2019–2026|TA|d|1GnYsrXIlo7aQa53_PhOcqxz0qzvMo4Qn
+Central Province · Grade 12 · 3rd term (MCQ + essay)|EN|f|1fst0_oog1vrGTMI63akPeBKbMcV61e4V
+AP Sir main paper 1 + reviews|TA·EN|d|1OzHmzwJBARmG-y64hBXfAF2mgKY-q8Zy
+AP Sir main paper 2 + reviews|TA·EN|d|1IKDGeqEUVtxqqIsriNY26TkKWE7bIiIc
+AP Sir main paper 3 + reviews|TA·EN|d|1pFdbDUfFiA15tlyWahX9SudOK6nrJ6y8
+2028 batch · 360° paper discussion papers + marking|EN|d|1fb4sMzsRfJ1txajzVpRNYrHCQjjbO59m
+2000+ classified MCQ book|TA|d|1_MdJQfTqL1LZstoHxgpDsVqKtaZZDMWh`);
+  add("phy", "Formulas, short notes & resource book", `
+Important formulas|TA|f|1P5CEBOxVqei0ZZp4KAZkw6lmNK90rWjx
+Full short note · Unit 01–11|TA|f|1w-bdBU2VxRPo8szI9oUxPtwTabk05ako
+Full short note · Unit 01–11 (part 1)|EN|f|1rKHaDgP_J_hG1PmqJ-jOACzkfpDktsKH
+Full short note · Unit 01–11 (part 2)|EN|f|1jGz6QfPRy4fFqqAjAUgdE4n52rlh6XR9
+Resource book|TA|d|1KFScLK-Vh7ThsOKAQXjZS50I9kPxdhSR
+Circular Motion short note (Janindu Sir)|EN|f|1u_ON4OVU8aNrN42Z5Wu641pnTVij6nvB
+Measurement & Mechanics short note 1 (Janindu Sir)|EN|f|1amUwnlEEy8GWa7zDTEq5Ev954RmkiEzs
+Measurement & Mechanics short note 2 (Janindu Sir)|EN|f|1KFBy3zR5ycM3ZUHchsh5k-U2aehbZ-dP`);
+  add("phy", "Handwritten notes by unit · Tamil medium", `
+Unit 01 · Measurement|TA|f|12GdWYT6eQwvXfhBnB5-t-ie6toy9nHmZ
+Unit 02 · Mechanics|TA|f|1TiOupiDHa6BSpmKKXxo67jVuPJCy0M1x
+Unit 03 · Light|TA|f|1_KqtDJyuzleVhXVpWMIBOsWXdR7vp2NI
+Unit 03 · Sound|TA|f|1QFkWqy0X6ZiAGsWK6w2o2gLnmimk5pl5
+Unit 04 · Thermal Physics|TA|f|1VCoeVSlm692ugELg9Uk1iwgLwrCGg3Gs
+Unit 05 · Gravitational Field|TA|f|1bLxpnvElx7FqOWhIIBTtvCSkHv1u-2av
+Unit 06 · Electric Field|TA|f|108wD01SWwRI6Ok2JKsKhM3CBv_RSeTAg
+Unit 07 · Magnetic Field|TA|f|10XTjh7UvPi-sGPhpUb5J8NVFLoE9EAkb
+Unit 08 · Current Electricity|TA|f|1AsqausTDeHBewYxQ3YE4Z27SdigTb2gt
+Unit 09 · Electronics|TA|f|1reh8JzuXjemK1XaGNzuDq_5fYm1ZIy8B
+Unit 10 · Properties of Matter|TA|f|1TtRh5tLuZFsAr3vQ3_unSeWdzdPQWGjw
+Unit 11 · Matter and Radiation|TA|f|1EHREAZDu4OQzvqdNrTNi70byfx0lkW83`);
+  add("phy", "Practical resources", `
+Practical guide book (with removed practicals)|TA|f|10GBrwLFryCX95WHtUC1GKCmAPF5WMvT7
+Practical handwritten note|TA|f|1pr9NzkceY-6BT1rR3yiROBbEOTDdPjSm
+Practical handwritten · Mechanics|EN|f|1_KNdUdt2XDjV7aGqwJ4j1rm7H9x2bFip
+Practical handwritten · Light|EN|f|1hj72dBLXzNdBhr_6nm4Tqkxx4iyhz-m7
+Practical handwritten · Sound|EN|f|1nDTu1qmlk1Ekf6M5hlvWUwjOT2q7IZHa
+Practical handwritten · Thermal Physics|EN|f|147ou45PFvvxAsSi26b-0VeGxVoNt3Rqp
+Practical handwritten · Current Electricity|EN|f|1q28texCAyhfci7VDAoSQe0Kl-7FQ7Xka
+Practical handwritten · Properties of Matter|EN|f|1UGfWkMKEfSfA2BVo8yrNePQz7inr9ONW`);
+  add("phy", "Theory tutes · Tamil medium", `
+Viscosity (Anuradha Perera Sir)|TA|f|1m7yD6ARgeq9HkLtRHK26rCEEaTAQR2gR
+Elasticity|TA|f|192uIwy2iyUrq0b5qVGh2D3vDc_kLEmkj
+Surface Tension|TA|f|120Wvemi-ldEwZi1aZNK-Fc8O1vgwuw8O
+Matter & Radiation|TA|f|1tK2TpixkmeBOahr6ed2_ajakGiqnI8wD
+Gravitational Field|TA|f|16hCaniU29A9s_d_ui-44ZFjijuNl2AEz
+Gravitational Field tute reviews|TA|f|19jT5SjhkZp_s5-enXCAgPfbIDpNLJEa8
+Gravitational Field (more)|TA|d|17DkTqRd2ZDwmLJ4l5M24naQL9hYyIwh3
+Properties of Matter|TA|d|1W22HvFnw9wO7E2gSia40HGa7BjExliQI
+Simple Harmonic Motion|TA|f|1o6rMy4KH1swRdPlSd2U1anZlHpANCkB6
+Gas Laws|TA|f|1fSAYItmwvS78rO27GIGFoEqA87YodUtE
+Mechanics · force, friction, momentum, vectors, work & energy…|TA|d|1iGAwpAGzAMc3cQ9TBRqs1RTmpH3deARk`);
+  add("phy", "Theory tutes + practice questions · English medium (Janindu Sir)", `
+Vectors & Motion|EN|d|1HvSItWV0HzBY3_BytcWyfaoKVPdFQTkm
+Work, Power & Energy|EN|d|1TvGDkyjZcihd5_a3KRmrz6oL-7ttc_hI
+Waves & Oscillations|EN|d|1KDnFMPshA1NapKK_3oaTBEmNdZMUFdat
+Waves & Oscillations · full lesson recordings|EN|y|https://www.youtube.com/playlist?list=PL7FOn9MKzQv9_-a8FJNmEhi2Af21e3oVj
+Coplanar Forces|EN|d|1b7t7UFR2oaypeWsJNg0VmZAd4wpBXPw9
+Fluid Mechanics|EN|f|1SSfECiRmGHzF3GhUmjmmhZUPY8pkr4gr
+Light|EN|f|1Xh_W1gzn6p3ySUvMbZ26Fgwd1j3kOSTX
+Matter & Radiation|EN|f|1wIzjE32E5UrvjEgCbCFbsLHQPFh3pnyK
+Gravitational Field|EN|d|1R1Mh4jVmv60YSj1EYe_WvVBwB4aoW7hL
+Electrostatic Fields|EN|f|1a-DDPEjo6WB2_Wf8eeG9OV9sm1jZSzQZ
+Thermal Physics|EN|d|1_P-19QlajnmzDVRCKEfJ0__ksgL7lA1h
+Properties of Matter|EN|d|1rfbSmtUJHFBUaJZIFy1hy99aBgsRjDeE`);
+
+  // COMBINED MATHS
+  add("maths", "Past papers + marking schemes", `
+Mora A/L papers 2015–2026|TA|d|1vm5NM6R3V4wMK6wXW1wv16Ka5e-N0eAM
+FWC 1st term 2022–2027|TA|d|1KURS3-DRb9tWesuo0pb510fFGG41Rzud`);
+
+  // ICT (GIT)
+  add("ict", "GIT · 2027 students", `
+Short notes|TA|f|1xDmoflS7dnmdlYfk5fWXziZzz2xoDQqH
+Short notes|EN·SI|f|1lWV6S8W7qaUFcvJOcJ92-RCHY0Mw3K_j
+Complete note|EN|f|1QzSSPd9qvkZglhqnjw82m-XGrWZAkSSX
+Teacher's guide|TA|f|1B8Jd1_IX3X0ollkbqfieMWnCwvr3k9vm
+Teacher's guide|EN|f|1tlNQz1uIfiZi8DwLMp2eZi8fVwYcVn8T
+Past papers + marking schemes 2019–2025|TA|d|10rHaCjYk9Uu_Xf_KfU8JlT331k7edSZs
+Past papers + marking schemes 2019–2025|EN|d|18yMgXTC6Ki44OeGVBYrsxSMlVCNdQ-DI`);
+
+  // GENERAL
+  add("gen", "A/L Z-score cut-off marks", `
+2019|EN|f|1U2rETwfoySaF73CI8NTvrcSFmZDs0-IX
+2020|EN|f|1MS8BNVUAAWHIBLGqvRJ-BN7mfFPyzqho
+2021|EN|f|1eoXn8mAmklC8_cZjORkT6tihAUB3pbPu
+2022|EN|f|1dtAIAFvQjdrQaIJ93YgnCF0bJbeMX-Ay
+2023|EN|f|1WRc3y-sctP2QzcsdDfTA5QYBOPJlTKJF
+2024|EN|f|1v_WPt3QKIHnzmblHyBao6V9oYEBCUG5c
+2025|EN|f|1hWVW5C9RPLypUg8S67nZNde5uOZr9mIi
+2026|EN|f|1W8PZcu_mH6l-5ZKoVBE5dwGwZoQhSOeu`);
+  add("gen", "2026 AL batch · final exam papers + marking · Science stream", `
+All papers (GCE AL final exam)|TA|d|1_w6_pQqz3puyEVpp8Q0RV8x2x7n7iGKS
+Eastern Province|TA|d|1wOD_Kgy9UrOr02j4UeeTPw6nPOQ07qk8
+Ministry of Education (MOE)|TA|d|1CH13mhqGlEZW3rMe1fEuzX3objtTVDCp
+Northern Province|TA|d|1FDCleMnTb2UkJ7F9GSVZmLxIdGHnSUzA
+GMSA|TA|d|1Hd-Lklp1yy3wY0LvCtEqIB5oT0dImCXr
+Dream Way|TA|d|1yh6tfZDo834yohbJqq5oLq1LcbGnhFyj
+AAE|TA|d|1qWm67XrD0MltjCxums2g7Neit-O_ehla`);
+  add("gen", "Exam info", `
+FWC exam time table|EN|w|4011`);
+
+  var libFilter = "all";
+
+  function mk(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+  function applyFilter() {
+    Array.prototype.forEach.call(document.querySelectorAll("#lib .sblock"), function (b) {
+      b.hidden = libFilter !== "all" && b.getAttribute("data-s") !== libFilter;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".chip"), function (c) {
+      c.setAttribute("aria-pressed", c.getAttribute("data-f") === libFilter ? "true" : "false");
+    });
+  }
+  function renderLibrary() {
+    var T = I18N[lang];
+    var root = document.getElementById("lib");
+    root.textContent = "";
+    RES.forEach(function (s) {
+      var sb = mk("div", "sblock");
+      sb.setAttribute("data-s", s.id);
+      var h = mk("h3");
+      h.appendChild(document.createTextNode(T[s.nameKey] || s.name[lang]));
+      h.appendChild(mk("span", "code", s.code));
+      sb.appendChild(h);
+      s.groups.forEach(function (g) {
+        var gr = mk("div", "group");
+        gr.appendChild(mk("h4", null, g.t[lang]));
+        var list = mk("div", "items");
+        g.items.forEach(function (it) {
+          var a = mk("a", "item");
+          a.href = it.u; a.target = "_blank"; a.rel = "noopener";
+          var txt = mk("span", "txt");
+          var nm = mk("span", "nm", it.n[lang]);
+          if (it.m) nm.appendChild(mk("span", "badge", it.m));
+          txt.appendChild(nm);
+          txt.appendChild(mk("span", "note", (it.note ? it.note[lang] + " · " : "") + (it.k === "folder" ? T.kFolder : T.kFile)));
+          a.appendChild(txt);
+          a.appendChild(mk("span", "go", T.open + " →"));
+          list.appendChild(a);
+        });
+        gr.appendChild(list);
+        if (g.soon) gr.appendChild(mk("p", "soon", g.soon[lang]));
+        sb.appendChild(gr);
+      });
+      root.appendChild(sb);
+    });
+    applyFilter();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".chip"), function (c) {
+    c.addEventListener("click", function () { libFilter = c.getAttribute("data-f"); applyFilter(); });
+  });
+
+  var ZONE_KEYS = ["z1n", "z2n", "z3n", "z4n", "z5n"];
+  var ZONE_LIMITS = [200, 1000, 4000, 6000, 10936];
+  var MAX_DEPTH = 10935; // Challenger Deep, metres
+  var lang = "en";
+
+  var depthEl = document.getElementById("depth");
+  var zoneEl = document.getElementById("zone");
+  var footEl = document.getElementById("foot-depth");
+  var ticking = false;
+
+  function update() {
+    ticking = false;
+    var T = I18N[lang];
+    var doc = document.documentElement;
+    var max = Math.max(1, doc.scrollHeight - window.innerHeight);
+    var f = Math.min(1, Math.max(0, window.scrollY / max));
+    var d = Math.round(f * MAX_DEPTH);
+    var idx = ZONE_LIMITS.length - 1;
+    for (var i = 0; i < ZONE_LIMITS.length; i++) { if (d < ZONE_LIMITS[i]) { idx = i; break; } }
+    var zoneName = T[ZONE_KEYS[idx]];
+    var amount = d.toLocaleString("en-US") + " " + T.unit;
+    depthEl.textContent = amount;
+    zoneEl.textContent = zoneName;
+    footEl.textContent = zoneName + " · " + amount;
+  }
+
+  function setLang(next) {
+    lang = next;
+    var T = I18N[lang];
+    document.documentElement.lang = lang;
+    Array.prototype.forEach.call(document.querySelectorAll("[data-i]"), function (el) {
+      var key = el.getAttribute("data-i");
+      if (T[key] !== undefined) el.textContent = T[key];
+    });
+    document.getElementById("strata").setAttribute("aria-label", T.strataAria);
+    ["en", "ta", "si"].forEach(function (code) {
+      document.getElementById("lang-" + code).setAttribute("aria-pressed", lang === code ? "true" : "false");
+    });
+    try { localStorage.setItem("dos-lang", lang); } catch (e) {}
+    renderLibrary();
+    update();
+  }
+
+  document.getElementById("lang-en").addEventListener("click", function () { setLang("en"); });
+  document.getElementById("lang-ta").addEventListener("click", function () { setLang("ta"); });
+  document.getElementById("lang-si").addEventListener("click", function () { setLang("si"); });
+  window.addEventListener("scroll", function () {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }, { passive: true });
+  window.addEventListener("resize", update);
+
+  var start = "en";
+  try {
+    var saved = localStorage.getItem("dos-lang");
+    var nav = (navigator.language || "").toLowerCase();
+    if (saved === "en" || saved === "ta" || saved === "si") start = saved;
+    else if (nav.indexOf("ta") === 0) start = "ta";
+    else if (nav.indexOf("si") === 0) start = "si";
+  } catch (e) {}
+  setLang(start);
+</script>
+
+</body>
+</html>
