@@ -313,8 +313,37 @@ body { background: transparent; }
 .bg3d .ring { background-image: var(--bgring); }
 .bg3d .core { background-image: var(--bgcore); }
 </style>
+<style id="ui5">
+.search { display: flex; align-items: center; gap: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 5px 8px 5px 18px; margin: 0 0 22px; box-shadow: 0 6px 24px rgba(0,174,239,.10); transition: box-shadow .2s, border-color .2s; }
+.search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent); }
+.search input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--fg); font: inherit; font-size: 1.05rem; padding: 11px 4px; outline: none; }
+.search button { flex: none; border: 0; background: var(--line); color: var(--fg); border-radius: 50%; width: 34px; height: 34px; cursor: pointer; }
+.rcount { font-family: var(--font-mono); font-size: .85rem; color: var(--muted); margin: 0 0 10px; }
+.open, .btn, .chip, .subject, .subnav a, .lang button, .item { position: relative; overflow: hidden; }
+.rip { position: absolute; border-radius: 50%; background: currentColor; opacity: .3; transform: scale(0); animation: rip .65s ease-out forwards; pointer-events: none; }
+.open .rip { background: #fff; }
+@keyframes rip { to { transform: scale(1); opacity: 0; } }
+.open:active, .btn:active, .chip:active, .subject:active, .lang button:active { transform: scale(.96); }
+.open { transition: transform .15s, filter .15s; } .open:hover { transform: translateY(-2px); }
+.item { transition: background .2s; } .item:hover { background: color-mix(in srgb, var(--cc, var(--accent)) 9%, transparent); }
+.js #lib .group:not(.in) { opacity: 0; transform: translateY(22px); }
+.group { transition: opacity .55s ease, transform .55s ease; position: relative; overflow: hidden; }
+.group::after { content: ""; position: absolute; right: -26px; bottom: -26px; width: 150px; height: 150px; background: var(--bgcore) center / contain no-repeat; opacity: .07; pointer-events: none; }
+main { animation: pagein .6s ease both; } @keyframes pagein { from { opacity: 0; transform: translateY(12px); } }
+body.leaving main, body.leaving header { opacity: 0; transition: opacity .2s; }
+.totop { position: fixed; right: 16px; bottom: 16px; z-index: 50; width: 60px; height: 60px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); display: grid; place-items: center; cursor: pointer; opacity: 0; transform: scale(.6); pointer-events: none; transition: opacity .3s, transform .3s; box-shadow: 0 8px 24px rgba(0,0,0,.25); padding: 0; }
+.totop.show { opacity: 1; transform: none; pointer-events: auto; }
+.totop .logo { filter: none; } .totop .ring { animation: none; }
+.splash { position: fixed; inset: 0; z-index: 100; display: grid; place-content: center; justify-items: center; gap: 18px; background: var(--bg); animation: splash-out .7s ease 1.3s forwards; }
+.splash b { font-family: var(--font-display); font-size: 1.4rem; letter-spacing: .02em; animation: pagein .8s ease .3s both; }
+@keyframes splash-out { to { opacity: 0; visibility: hidden; } }
+@media (prefers-reduced-motion: reduce) { .splash, main, .group, .rip { animation: none; } .js #lib .group:not(.in) { opacity: 1; transform: none; } }
+</style>
 </head>
 <body class="sub" data-page="ict">
+<div id="splash" aria-hidden="true"><div class="logo" style="--s:min(52vw,220px)"><i class="ring"></i><i class="core"></i></div><p>Depth of Science</p></div>
+<script>try{if(sessionStorage.getItem("dos-splash")){document.getElementById("splash").remove();}else{sessionStorage.setItem("dos-splash","1");}}catch(e){}</script>
+
 <div class="bg3d" aria-hidden="true"><div class="tilt"><div class="stage">
 <div class="layer" style="--z:-160px;--o:.35"><i class="ring"></i></div>
 <div class="layer" style="--z:-110px;--o:.5"><i class="ring"></i></div>
@@ -348,7 +377,9 @@ body { background: transparent; }
     <h1 data-i="s5">ICT</h1>
     <p class="lede"><b id="p-count"></b> <span data-i="resWord">resources</span> <span id="p-med"></span></p>
   </div>
-  <section class="block"><div class="wrap"><div class="filters" id="jump"></div><div id="lib"></div></div></section>
+  <section class="block"><div class="wrap"><div class="searchbox"><span aria-hidden="true">🔍</span><input id="q" type="search" placeholder="Search resources… e.g. past paper, redox, 2024" autocomplete="off" aria-label="Search resources"></div>
+<div id="results"></div>
+<div class="filters" id="jump"></div><div id="lib"></div></div></section>
   <section class="block"><div class="wrap"><div class="final">
         <h2 data-i="finalH">Start revising today.</h2>
         <p data-i="finalP">Follow Depth of Science for free notes, papers and updates.</p>
@@ -1177,6 +1208,134 @@ Organic · 300 conversions|EN|f|1lvpccXaaVhRy0GzFlNRq1_pyKNtrvTFp`);
     var pc = document.getElementById("p-count"); if (pc) pc.textContent = countOf(PAGE);
     var pm = document.getElementById("p-med"); if (pm) pm.textContent = "\u00b7 " + MED_NAME[MED];
   }
+  var EQ = [["paper","ppr","pprs","pp","exam"],["note","tute","tutorial","handwritten"],["mcq","objective"],["essay","eq","seq","structured"],["pesuru","pesaru","classified"],["chem","chemistry","chemical"],["phy","physic"],["bio"],["math","mathematic","combined","cm"],["ict","git","computer"],["marking","scheme","answer","key"],["practical","prac","lab"],["book","resource","reference","guide"],["mora","moratuwa"],["tamil","ta","tm"],["english","en","em"],["sinhala","si","sm"],["review","revision","recap"],["model","final"],["unit","chapter"]];
+  var STOP = { medium: 1, the: 1, of: 1, for: 1, and: 1, a: 1, in: 1, to: 1, me: 1, show: 1 };
+  function nrm(t) { return t.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().split(" ").filter(Boolean); }
+  function st(w) { return w.length > 3 ? w.replace(/(es|s)$/, "") : w; }
+  function lev(a, b) { var m = a.length, n = b.length, d = [], i, j; for (i = 0; i <= m; i++) d[i] = [i]; for (j = 1; j <= n; j++) d[0][j] = j;
+    for (i = 1; i <= m; i++) for (j = 1; j <= n; j++) d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1)); return d[m][n]; }
+  function alts(w) { var o = [w]; EQ.forEach(function (g) { if (g.indexOf(w) >= 0) o = o.concat(g); }); return o.map(st); }
+  function tokScore(a, tw) { var best = 0; a.forEach(function (x) { tw.forEach(function (t) { var s = 0;
+    if (t === x) s = 3; else if (x.length >= 3 && t.length >= 3 && (t.indexOf(x) === 0 || x.indexOf(t) === 0)) s = 2; else if (x.length >= 4 && lev(x, t) <= (x.length >= 7 ? 2 : 1)) s = 1.5;
+    if (s > best) best = s; }); }); return best; }
+  function sname(s) { return I18N.en[s.nameKey] || (s.name && s.name.en) || s.id; }
+  function runSearch(q) {
+    var res = document.getElementById("results"); if (!res) return;
+    var qt = nrm(q || "").filter(function (w) { return !STOP[w]; }); res.textContent = "";
+    document.body.classList.toggle("searching", qt.length > 0); if (!qt.length) return;
+    var qa = qt.map(function (w) { return alts(st(w)); }), hits = [], weak = [];
+    RES.forEach(function (s) { if (PAGE !== "home" && s.id !== PAGE) return; s.groups.forEach(function (g) { g.items.forEach(function (it) {
+      if (!vis(it)) return;
+      if (!it._t) { var mt = (it.m || "").toLowerCase().split("\u00b7").map(function (c) { return { ta: "tamil", en: "english", si: "sinhala" }[c] || ""; }).join(" ");
+        it._t = nrm(it.n.en + " " + g.t.en + " " + sname(s) + " " + s.id + " " + mt).map(st); }
+      var sc = 0, miss = 0; qa.forEach(function (a) { var m = tokScore(a, it._t); if (m) sc += m; else miss++; });
+      if (sc > 0) (miss === 0 ? hits : weak).push({ it: it, s: s, g: g, sc: sc });
+    }); }); });
+    var out = (hits.length ? hits : weak).sort(function (a, b) { return b.sc - a.sc; }).slice(0, 80), T = I18N.en;
+    var box = mk("div", "group"); box.setAttribute("data-cat", "paper");
+    var gh = mk("div", "ghead"); gh.appendChild(mk("span", "gico", "\uD83D\uDD0E"));
+    gh.appendChild(mk("h4", null, out.length ? (hits.length ? "" : "Closest matches for ") + "\u201C" + q.trim() + "\u201D" : "No match for \u201C" + q.trim() + "\u201D"));
+    gh.appendChild(mk("span", "gcount", String(out.length))); box.appendChild(gh);
+    var list = mk("div", "items");
+    if (!out.length) list.appendChild(mk("p", "soon", "Try another word, e.g. paper, notes, mcq, redox, 2024, tamil."));
+    out.forEach(function (h) { var it = h.it, a = mk("div", "item");
+      a.appendChild(mk("span", "ico", it.k === "folder" ? "\uD83D\uDCC1" : "\uD83D\uDCC4"));
+      var txt = mk("span", "txt"), nm = mk("span", "nm", it.n.en); if (it.m) nm.appendChild(mk("span", "badge", it.m)); txt.appendChild(nm);
+      txt.appendChild(mk("span", "note", sname(h.s) + " \u00b7 " + h.g.t.en)); a.appendChild(txt);
+      var op = mk("a", "open", T.open + " \u2197"); op.href = it.u; op.target = "_blank"; op.rel = "noopener"; a.appendChild(op); list.appendChild(a); });
+    box.appendChild(list); res.appendChild(box);
+  }
+  (function () { var qe = document.getElementById("q"); if (qe) qe.addEventListener("input", function () { runSearch(qe.value); }); })();
+
+  // ---- round 5 resources
+  add("gen", "Mora papers · year by year", `
+2015|EN|d|1DfXAYVQUVqaUpyZrw37R55iST6S4eH5s
+2016|EN|d|16DgLIwjhCR26Q7kkFjUwBzuBtQCVOqA1
+2017|EN|d|1dBv8uoBlWZA26N789Sp3nvk0E1-Lo5CM
+2018|EN|d|1i5xEfJ9LIxIqG7Konw_oYFXb52Vpy2vp
+2019|EN|d|1j8gxaKEq5yLDvbX9zu2-3sywot2AGpQg
+2020|EN|d|1VdAvYYDSi3mSPexJ-wuS28Yc8sPkBI3R
+2021|EN|d|1lh7JwVnqEY99VfdnwHehXPPqzyiVmaEd
+2022|EN|d|1awhmkfwLsMwl5W6KjDqcxIC_n-uvcTVf
+2023|EN|d|1SjxKWGTWd6CjTLAoy16LRiGDl4u1j913
+2024|EN|d|1axpNoHkCASt1mb4tWjRJwdSaLEusUnsF
+2025|EN|d|179qspqnoLzI7f2J6IqxJKhgDIE2aUmdv
+2026|EN|d|1IqIxW323YNLR6LYYjndUu1WLL9AXMzT3`);
+  add("bio", "More school & provincial papers", `
+Vishaka College|EN|d|1gGQxPuAOh3_eT7ve7dfrPGhOP_VF80HF
+Rathnavali Balika|EN|d|1k4Ucl9b6T7oqPZJ16sncVh7Mv8E1jrDM
+Ananda College · term test|EN|d|1x2KUudcCfShZYmOgRMDcY0_YNgSQ3NH8
+Devi Balika · term test|EN|d|1FMS6Sq1YiMF0wCIIteGax97cPbnKIH1Z
+Government papers|EN|d|120OxhuQqtCiHCfm2jhXmgzuplAgGWXjm
+Pre Medicine Association · Colombo|EN|d|12ovydxXzaspeHeEljiQkxWupRyELYOEt
+Pre Medicine Association · Kurunegala|EN|d|1NSFbHPo6kwx41on4MZyf4HUIWwF1IQXO
+North Western Province|EN|d|1Jv464UKjM9U9lJ3Pe5Z6BY5oEETHtJFg
+Northern & Western Province|EN|d|1kQmiM9rigy_PSDvqyd0lp1sTUHh-cbDt`);
+  add("bio", "FWC term papers · Grade 12 & 13", `
+Grade 12 · English medium|EN|d|1oE56fLcSDehny0k471Qi8L3vxr-Xsrog
+Grade 13 · English medium|EN|d|1PMvgOec18yKYCYDWaGyuQ2qCW6J7uX_z
+Grade 12 · Tamil medium|TA|d|1kcNBJpwQ0TZ2RoYGoZ-9tbTpS64nXvG_
+Grade 13 · Tamil medium|TA|d|1YLnbln98WwHVEE0xorcPvSwASUQ8qzl5`);
+  add("bio", "English medium papers & reviews", `
+EM past papers|EN|d|1dfcX6Ej9RaYXQf2CKniUIKyubf0OacyU
+EM Pesuru reviews|EN|d|1NjnTDchESk91L-oE-aTmlfCxCu7q3CVQ
+EM resource books|EN|d|10XFy1ER9OsduUWhsa3x-bX4qj1Az2-_v`);
+  add("bio", "Classified questions (Pesuru) · English medium", `
+Pesuru MCQs|EN|d|1UuGJCPEgFR6KHgk5V5Cuvgc5BIlAjPgj
+Pesuru SEQs|EN|d|1zBOvX636DT7gsdoX9kI2EWUHNSEWirs8
+Essay classified|EN|f|1yLFUkoX6dLotc9gXhNKR6H5Rzu7FoXAe`);
+  add("bio", "Practical handbooks", `
+Practical handbook|EN|f|1MsHX_lkCNuxNuzDCyDXSVXfQlWht-5wa
+Practicals · Dr. Mangalehi|EN|f|1huFNqodlDyUJOae-DHhAP_vsWyNBKu75`);
+  add("chem", "More school & provincial papers", `
+Vishaka College|EN|d|1M22mm5sXf5t891yykpUxAwfIs_q5rZoN
+Rathnavali Balika|EN|d|1_GhNfbAcbIFiXeFse1AnOhHjTBQcgkZk
+Pre Medicine Association · Kurunegala|EN|d|1ECRCqrExjv3KyHH2VM3Kym2xfBA_EOaw
+North Western Province|EN|d|1croEt4G1r6bk5RlKAePiNSe6ScPGq6WQ`);
+  add("chem", "FWC term papers · Grade 12 & 13", `
+Grade 12 · English medium|EN|d|1c3R8PBK_bMp1nj1JHy48CZ6j0JNxY2Tb
+Grade 13 · English medium|EN|d|1Fk8hVUaeg7_VT0XnLHyYs0sUHNCM0SrN
+Grade 12 · Tamil medium|TA|d|14gfN_Rej2Ybd6paJosYjUjF-GUW_hEew
+Grade 13 · Tamil medium|TA|d|1aDwn7PXrrYlKh_Nv53jwnW3Lmtyfqdmg`);
+  add("phy", "More school & provincial papers", `
+Vishaka College|EN|d|1c8n60QafQOH7xSPh85ck8rAjblrjLof-
+Rathnavali Balika|EN|d|1yjJo6C2I_UXs7lBZ48fz1ap2QP-3rax_
+Devi Balika · term test|EN|d|1WwdILponJUF_y7QMbsJXHAIg5161P-HH
+Isipathana College|EN|d|1MrXmqMNfxbibtrR6VWmrW5Ua_xDiSLxn
+North Central Province|EN|d|1FrT_E6QCuFMFCjtCLwenvUUVT-AFSMMV`);
+  add("phy", "FWC term papers · Grade 12 & 13", `
+English medium|EN|d|1e8k3W660kdn9mYZ9suuGUrfcfVCpyEU9
+Grade 12 · Tamil medium|TA|d|1V7H2lZDhFY859CTntXH8Le4j0RZakU6L
+Grade 13 · Tamil medium|TA|d|1Xgb-I8eNcPLXmuX8dq7y_o6JXYVVQKgt`);
+  add("maths", "FWC term papers · Grade 12 & 13", `
+Grade 12 · English medium|EN|d|1SuL6FyBpXy-Tb6FWyEkhdYfAmh5hM4eF
+Grade 13 · English medium|EN|d|1Uc8C9guvfREsnqg0acs0WkqJq8XPwDoJ
+Grade 12 · Tamil medium|TA|d|1uurLfoorGvSGBiRE2nmTM8KiE1ycJ7p-
+Grade 13 · Tamil medium|TA|d|1HenziqqZT1xgkbHMsuD5QNsTyzZHsjUy`);
+  add("maths", "English medium books & papers", `
+Nilmini A books|EN|d|1EAe_GwSYG-quXa_fEnd_pvUUoq4s2jGw
+Past papers 2000–2026|EN|d|1zTsTwZHdPSP5HGRzZ8czzJEQogIjfnjM
+Reference books|EN|d|1arlJl1xm7Z_5HF12-Fg_j22AUWjbrdr0
+Resource book|EN|d|1jGJlWi4k9L-_cd8tTFqGkfAAF9gQC6wF`);
+  add("maths", "Classified questions (Pesuru)", `
+EM Pesuru questions|EN|d|1_Wbs7fkMLp_lsyZ_0H9FIwlhkrj-Sky3
+SM Pesuru questions|SI|d|1IIkHSLZEvy71iTGt4mLT45xQBmRH2ROJ
+SM Pesuru answers|SI|d|1RGqnO_uTAH_PUZitolm6B8NrFeb0Qv_R`);
+  add("maths", "Sinhala medium past papers", `
+SM past papers|SI|d|1GbP9Da-nH0TO6czd6ouzVA0_PN7npDnj`);
+  add("maths", "Notes & syllabus", `
+A/L syllabus|EN|f|10v6FAdttZA6dQS8oQ0E4BYCFFlavofAe
+SL & Circle theory notes|EN|f|1cTvZav_n9LdvQyY8Pjmp3xzsZ012BMUS`);
+  add("ict", "FWC term papers · Grade 12 & 13", `
+Grade 12 · English medium|EN|d|1dgsYJw95ldwfr6Nbpp_Sb9vl48Dj3Gzq
+Grade 13 · English medium|EN|d|1WH8kK1pVIArFmKt--_7nB2sNlV0XvmGH
+Grade 12 · Tamil medium|TA|d|14yLnCwgvEMzJmNahMjBGS6kqWfx-Ewrl
+Grade 13 · Tamil medium|TA|d|184mvZyTAejwws9CAkalPITpABKsxHh6I`);
+  add("ict", "Past papers, Pesuru & reviews", `
+ICT past papers|EN|d|1ZCBbt2wKIHmWwXhFITjeC4o-DjeF2lrt
+EM Pesuru|EN|d|1X_UlKj-Hhf33bw7V8nlHTM1ryqbw3464
+EM ICT reviews|EN|d|1R3kW-fxkYWNKXDEHLK7iN09a9VaksWuj`);
+
   var libFilter = "all";
 
   function mk(tag, cls, text) {
@@ -1292,6 +1451,7 @@ Organic · 300 conversions|EN|f|1lvpccXaaVhRy0GzFlNRq1_pyKNtrvTFp`);
     });
     try { localStorage.setItem("dos-med", MED); } catch (e) {}
     renderLibrary();
+    runSearch((document.getElementById("q") || {}).value);
     refreshCounts();
     update();
   }
@@ -1352,6 +1512,38 @@ Organic · 300 conversions|EN|f|1lvpccXaaVhRy0GzFlNRq1_pyKNtrvTFp`);
   function set(k, v) { t.style.setProperty(k, v); }
   window.addEventListener("pointermove", function (e) { set("--px", ((e.clientX / innerWidth - 0.5) * 36) + "deg"); set("--py", (-(e.clientY / innerHeight - 0.5) * 36) + "deg"); }, { passive: true });
   window.addEventListener("scroll", function () { if (busy) return; busy = true; requestAnimationFrame(function () { busy = false; var m = document.documentElement.scrollHeight - innerHeight || 1; set("--sy", ((scrollY / m) * 50 - 25) + "deg"); }); }, { passive: true });
+})();
+</script>
+<button type="button" class="totop" id="totop" aria-label="Back to top"><span class="logo" style="--s:46px" aria-hidden="true"><i class="ring"></i><i class="core"></i></span></button>
+<script id="fx-js">
+(function () {
+  document.documentElement.classList.add("js");
+  window.reveal = function () {
+    var gs = document.querySelectorAll("#lib .group:not(.in)"), i;
+    if (!("IntersectionObserver" in window)) { for (i = 0; i < gs.length; i++) gs[i].classList.add("in"); return; }
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { threshold: 0.08 });
+    for (i = 0; i < gs.length; i++) io.observe(gs[i]);
+  };
+  window.reveal();
+  document.addEventListener("pointerdown", function (e) {
+    var t = e.target.closest && e.target.closest(".open,.btn,.chip,.subject,.subnav a,.lang button,.item"); if (!t) return;
+    var r = t.getBoundingClientRect(), s = Math.max(r.width, r.height) * 2, i = document.createElement("span");
+    i.className = "rip"; i.style.cssText = "width:" + s + "px;height:" + s + "px;left:" + (e.clientX - r.left - s / 2) + "px;top:" + (e.clientY - r.top - s / 2) + "px";
+    t.appendChild(i); setTimeout(function () { i.remove(); }, 650);
+  }, { passive: true });
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a[href]");
+    if (!a || e.ctrlKey || e.metaKey || e.shiftKey || a.target === "_blank" || !/^[a-z]+\.html$/.test(a.getAttribute("href"))) return;
+    e.preventDefault(); document.body.classList.add("leaving"); setTimeout(function () { location.href = a.href; }, 220);
+  });
+  var tt = document.getElementById("totop");
+  if (tt) {
+    var rg = tt.querySelector(".ring");
+    window.addEventListener("scroll", function () { var m = document.documentElement.scrollHeight - window.innerHeight || 1; tt.classList.toggle("show", window.scrollY > 300); rg.style.transform = "rotate(" + (window.scrollY / m * 720) + "deg)"; }, { passive: true });
+    tt.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
+  }
+  var sp = document.getElementById("splash");
+  if (sp) { try { if (sessionStorage.getItem("dos-splash")) sp.remove(); else sessionStorage.setItem("dos-splash", "1"); } catch (e) {} }
 })();
 </script>
 </body>
