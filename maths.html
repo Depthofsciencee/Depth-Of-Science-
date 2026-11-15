@@ -339,10 +339,32 @@ body.leaving main, body.leaving header { opacity: 0; transition: opacity .2s; }
 @keyframes splash-out { to { opacity: 0; visibility: hidden; } }
 @media (prefers-reduced-motion: reduce) { .splash, main, .group, .rip { animation: none; } .js #lib .group:not(.in) { opacity: 1; transform: none; } }
 </style>
+<style id="ui6">
+.sbtn { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); color: var(--fg); font-size: 1.1rem; cursor: pointer; display: grid; place-items: center; padding: 0; }
+.sov { position: fixed; inset: 0; z-index: 90; display: none; overflow-y: auto; padding: 16px 14px 40px; background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(12px); }
+.sov.open { display: block; animation: pagein .25s ease both; }
+.sbox { max-width: 760px; margin: 0 auto; }
+.srow { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.sov .searchbox { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; background: var(--panel); border: 1px solid var(--accent); border-radius: 999px; padding: 4px 16px; margin: 0; }
+.sov .searchbox input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--fg); font-size: 17px; padding: 12px 0; outline: none; }
+.sclose { flex: none; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); color: var(--fg); font-size: 1.1rem; cursor: pointer; padding: 0; }
+body.sopen { overflow: hidden; }
+body.searching #lib, body.searching #jump { display: none; }
+body[data-page="bio"] { --accent: #16a34a; --accent-fg: #fff; } body[data-page="chem"] { --accent: #ea580c; --accent-fg: #fff; }
+body[data-page="phy"] { --accent: #2563eb; --accent-fg: #fff; } body[data-page="maths"] { --accent: #db2777; --accent-fg: #fff; }
+body[data-page="ict"] { --accent: #0d9488; --accent-fg: #fff; } body[data-page="gen"] { --accent: #64748b; --accent-fg: #fff; }
+.phero { position: relative; overflow: hidden; padding: 30px 22px 28px; background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 30%, transparent), transparent 78%); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.phero h1 { color: var(--accent); font-size: clamp(2.4rem, 10vw, 4rem); }
+.pico { position: absolute; right: 14px; top: 8px; font-size: 5.6rem; line-height: 1; opacity: .92; animation: logo-float 5s ease-in-out infinite; pointer-events: none; }
+.phero > * { position: relative; }
+</style>
+<style id="ui7">
+.rain { position: fixed; inset: 0; z-index: 95; overflow: hidden; pointer-events: none; }
+.drop { position: absolute; top: 0; background: var(--core) center / contain no-repeat, var(--ring) center / contain no-repeat; opacity: 0; animation: drop-fall linear both; filter: drop-shadow(0 0 6px rgba(0,174,239,.5)); will-change: transform; }
+@keyframes drop-fall { 0% { opacity: 0; transform: translate3d(0,-14vh,0) rotate(0deg); } 10% { opacity: var(--o,.9); } 85% { opacity: var(--o,.9); } 100% { opacity: 0; transform: translate3d(var(--dx),112vh,0) rotate(var(--rot)); } }
+</style>
 </head>
 <body class="sub" data-page="maths">
-<div id="splash" aria-hidden="true"><div class="logo" style="--s:min(52vw,220px)"><i class="ring"></i><i class="core"></i></div><p>Depth of Science</p></div>
-<script>try{if(sessionStorage.getItem("dos-splash")){document.getElementById("splash").remove();}else{sessionStorage.setItem("dos-splash","1");}}catch(e){}</script>
 
 <div class="bg3d" aria-hidden="true"><div class="tilt"><div class="stage">
 <div class="layer" style="--z:-160px;--o:.35"><i class="ring"></i></div>
@@ -354,6 +376,10 @@ body.leaving main, body.leaving header { opacity: 0; transition: opacity .2s; }
 <div class="layer" style="--z:90px;--o:1"><i class="core"></i></div>
 </div></div></div>
 
+<div class="sov" id="sov" hidden>
+  <div class="sbar"><span aria-hidden="true">🔍</span><input id="q" type="search" placeholder="Search resources… (paper, mcq, notes, tamil)" autocomplete="off" enterkeyhint="search" aria-label="Search resources"><button type="button" id="sclose" aria-label="Close search">✕</button></div>
+  <div class="sres" id="results"></div>
+</div>
 <header>
   <div class="wrap bar">
     <a class="brand" href="index.html"><span class="logo" style="--s:32px" aria-hidden="true"><i class="ring"></i><i class="core"></i></span>Depth of Science</a>
@@ -368,7 +394,7 @@ body.leaving main, body.leaving header { opacity: 0; transition: opacity .2s; }
       <a class="btn small" data-join href="https://whatsapp.com/channel/0029VamYa7D6xCSPUPuZzS1J" target="_blank" rel="noopener" data-i="joinShort">Join channel</a>
     </div>
   </div>
-<nav class="wrap subnav" aria-label="Subjects"><a href="index.html" data-p="home" data-i="home">Home</a><a href="biology.html" data-p="bio" data-i="s1">Biology</a><a href="chemistry.html" data-p="chem" data-i="s2">Chemistry</a><a href="physics.html" data-p="phy" data-i="s3">Physics</a><a href="maths.html" data-p="maths" data-i="s4">Combined Maths</a><a href="ict.html" data-p="ict" data-i="s5">ICT</a><a href="general.html" data-p="gen" data-i="gen">General</a></nav>
+<nav class="wrap subnav" aria-label="Subjects"><button type="button" class="sbtn" id="sopen" aria-label="Search resources">🔍</button><a href="index.html" data-p="home" data-i="home">Home</a><a href="biology.html" data-p="bio" data-i="s1">Biology</a><a href="chemistry.html" data-p="chem" data-i="s2">Chemistry</a><a href="physics.html" data-p="phy" data-i="s3">Physics</a><a href="maths.html" data-p="maths" data-i="s4">Combined Maths</a><a href="ict.html" data-p="ict" data-i="s5">ICT</a><a href="general.html" data-p="gen" data-i="gen">General</a></nav>
 </header>
 <main id="top">
   <div class="wrap phero">
@@ -376,10 +402,9 @@ body.leaving main, body.leaving header { opacity: 0; transition: opacity .2s; }
     <p class="eyebrow">C.MATHS</p>
     <h1 data-i="s4">Combined Maths</h1>
     <p class="lede"><b id="p-count"></b> <span data-i="resWord">resources</span> <span id="p-med"></span></p>
+    <div class="stats"><div><b id="st-res"></b><span>resources</span></div><div><b id="st-grp"></b><span>sections</span></div><div><b id="st-med">All</b><span>medium</span></div></div>
   </div>
-  <section class="block"><div class="wrap"><div class="searchbox"><span aria-hidden="true">🔍</span><input id="q" type="search" placeholder="Search resources… e.g. past paper, redox, 2024" autocomplete="off" aria-label="Search resources"></div>
-<div id="results"></div>
-<div class="filters" id="jump"></div><div id="lib"></div></div></section>
+  <section class="block"><div class="wrap"><div class="filters" id="jump"></div><div id="lib"></div></div></section>
   <section class="block"><div class="wrap"><div class="final">
         <h2 data-i="finalH">Start revising today.</h2>
         <p data-i="finalP">Follow Depth of Science for free notes, papers and updates.</p>
@@ -619,10 +644,15 @@ var PAGE = document.body.getAttribute("data-page") || "home";
   function add(sid, title, rows) {
     var s = RES.filter(function (x) { return x.id === sid; })[0];
     if (!s) { s = { id: sid, nameKey: SK[sid], name: L(SN[sid]), code: SC[sid], groups: [] }; RES.push(s); }
-    s.groups.push({ t: L(title), items: rows.trim().split("\n").map(function (r) {
-      r = r.trim().split("|");
-      return { n: L(r[0]), m: r[1], k: r[2] === "d" ? "folder" : "file", u: url(r[2], r[3]) };
-    }) });
+    var seen = {}; s.groups.forEach(function (g) { g.items.forEach(function (i) { seen[i.u] = 1; }); });
+    var g = s.groups.filter(function (x) { return x.t.en === title; })[0];
+    if (!g) { g = { t: L(title), items: [] }; s.groups.push(g); }
+    rows.trim().split("\n").forEach(function (r) {
+      r = r.trim().split("|"); var u = url(r[2], r[3]), nk = r[0].toLowerCase() + "|" + r[1];
+      if (seen[u] || g.items.some(function (i) { return i.n.en.toLowerCase() + "|" + i.m === nk; })) return;
+      seen[u] = 1; g.items.push({ n: L(r[0]), m: r[1], k: r[2] === "d" ? "folder" : "file", u: u });
+    });
+    if (!g.items.length) s.groups = s.groups.filter(function (x) { return x !== g; });
   }
 
   // BIOLOGY
@@ -1336,6 +1366,37 @@ ICT past papers|EN|d|1ZCBbt2wKIHmWwXhFITjeC4o-DjeF2lrt
 EM Pesuru|EN|d|1X_UlKj-Hhf33bw7V8nlHTM1ryqbw3464
 EM ICT reviews|EN|d|1R3kW-fxkYWNKXDEHLK7iN09a9VaksWuj`);
 
+
+  // ---- round 6 resources
+  add("phy", "MCQ reviews · Prof. S.R.D. Rosa", `
+MCQ reviews 2000–2024|EN|d|1bTXMQPpha7kUM3YX2eJeRBg0PNjKzk5q
+MCQ reviews|TA|d|1KOIUXoOdbnAH6EGjsUk893yFXhC7TXE2
+MCQ reviews 1994–2025|SI|d|1sc1u-pOM_NnBlEjy9otvOGoenJzzauqi`);
+  add("phy", "Resource book, guide & notes", `
+Complete theory notes|EN|d|1qNGXzXin2aYn-y4_KIvS_C9toK5uVSsN`);
+  add("phy", "Question analysis", `
+JK Sir MCQ books & answers|TA|d|1OLnXRm40QVOrxQaDyoRobYcZsigdp3oM`);
+  add("bio", "MCQs & schemes · Tamil medium", `
+Paper 6 MCQs 2015–2025 + scheme|TA|d|1RqJ1IdZf8xfxuwQ5kBCWcMR1KnEUw0Bn
+Biology MCQs & scheme 2016–2025|TA|d|1zdY63S_A-xmTfakpPEocldzRuVqom2lc`);
+  add("bio", "Tamil medium library", `
+Updated resource book|TA|d|1qYfcjFM-IDrWsNFjXJ8qaAX2joSedXmA`);
+  add("chem", "MCQs & schemes · Tamil medium", `
+Chemistry MCQs & scheme 2016–2025|TA|d|10Ivg9NiYNbeX3F5XeYkLSyjqUfenADIR`);
+  add("chem", "Notes & MCQ points", `
+Chemistry notes|EN|d|1IA_zOyam3pglJDA1tSJ8FPDU6bwE-Bt2
+Chemistry notes|TA|d|1Z6P0tys-Q4Zn1XYxZUQzUMt9EYbQg7f
+Chemistry MCQ points|EN|d|1FKnKLu0x-e9unRV9hsMkv9_nInYBeYDS`);
+  add("maths", "English medium · books, papers & questions", `
+Additional reading & practice books|EN|d|1WLdUsfNKUKoyuC3iYWhNzmL8SOgzzhin
+Theory notes|EN|d|1bM9gnKj4ElzBgqWpaQtMjShvBO55h2mm`);
+  // remove repeats: same link twice in a subject keeps the first
+  RES.forEach(function (s) {
+    var seen = {};
+    s.groups.forEach(function (g) { g.items = g.items.filter(function (i) { if (seen[i.u]) return false; seen[i.u] = 1; return true; }); });
+    s.groups = s.groups.filter(function (g) { return g.items.length; });
+  });
+
   var libFilter = "all";
 
   function mk(tag, cls, text) {
@@ -1493,7 +1554,7 @@ EM ICT reviews|EN|d|1R3kW-fxkYWNKXDEHLK7iN09a9VaksWuj`);
   RES.forEach(function (s) { total += countOf(s.id); });
   Array.prototype.forEach.call(document.querySelectorAll("[data-count]"), function (el) { el.textContent = countOf(el.getAttribute("data-count")); });
   var stN = document.getElementById("st-n"); if (stN) stN.textContent = total + "+";
-  var pc = document.getElementById("p-count"); if (pc) pc.textContent = countOf(PAGE);
+  var pc = document.getElementById("p-count"); if (pc) pc.textContent = countOf(PAGE); var sr = document.getElementById("st-res"); if (sr) { sr.textContent = countOf(PAGE); var ng = 0; RES.forEach(function (x) { if (x.id === PAGE) x.groups.forEach(function (g) { if (g.items.some(vis)) ng++; }); }); document.getElementById("st-grp").textContent = ng; document.getElementById("st-med").textContent = { all: "All", en: "English", ta: "Tamil", si: "Sinhala" }[MED]; }
   Array.prototype.forEach.call(document.querySelectorAll(".subnav a"), function (a) {
     if (a.getAttribute("data-p") === PAGE) a.setAttribute("aria-current", "page");
   });
@@ -1542,8 +1603,30 @@ EM ICT reviews|EN|d|1R3kW-fxkYWNKXDEHLK7iN09a9VaksWuj`);
     window.addEventListener("scroll", function () { var m = document.documentElement.scrollHeight - window.innerHeight || 1; tt.classList.toggle("show", window.scrollY > 300); rg.style.transform = "rotate(" + (window.scrollY / m * 720) + "deg)"; }, { passive: true });
     tt.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
   }
+  var so = document.getElementById("sov"), sq = document.getElementById("q");
+  function openS() { so.hidden = false; document.body.style.overflow = "hidden"; setTimeout(function () { sq.focus(); }, 60); }
+  function closeS() { so.hidden = true; document.body.style.overflow = ""; sq.value = ""; runSearch(""); }
+  document.getElementById("sopen").addEventListener("click", openS);
+  document.getElementById("sclose").addEventListener("click", closeS);
+  so.addEventListener("click", function (e) { if (e.target === so) closeS(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !so.hidden) closeS(); });
   var sp = document.getElementById("splash");
   if (sp) { try { if (sessionStorage.getItem("dos-splash")) sp.remove(); else sessionStorage.setItem("dos-splash", "1"); } catch (e) {} }
+})();
+</script>
+<script id="rain-js">
+(function () {
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var n = document.body.getAttribute("data-page") === "home" ? 36 : 22, box = document.createElement("div");
+  box.className = "rain"; box.setAttribute("aria-hidden", "true");
+  for (var i = 0; i < n; i++) {
+    var d = document.createElement("span"), s = 18 + Math.random() * 30;
+    d.className = "drop";
+    d.style.cssText = "left:" + (Math.random() * 94) + "vw;width:" + s + "px;height:" + s + "px;animation-duration:" + (3.2 + Math.random() * 3.2) + "s;animation-delay:" + (Math.random() * 2.4) + "s;--dx:" + ((Math.random() - 0.5) * 120) + "px;--rot:" + ((Math.random() - 0.5) * 900) + "deg;--o:" + (0.55 + Math.random() * 0.45);
+    box.appendChild(d);
+  }
+  document.body.appendChild(box);
+  setTimeout(function () { box.remove(); }, 9500);
 })();
 </script>
 </body>
