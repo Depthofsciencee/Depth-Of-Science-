@@ -330,10 +330,11 @@ body { background: transparent; }
     <a class="brand" href="index.html"><span class="logo" style="--s:32px" aria-hidden="true"><i class="ring"></i><i class="core"></i></span>Depth of Science</a>
     <div class="gauge" aria-hidden="true"><span class="zone" id="zone">Sunlight zone</span><b id="depth">0 m</b></div>
     <div class="tools">
-      <div class="lang" role="group" aria-label="Language">
-        <button type="button" id="lang-en" aria-pressed="true">EN</button>
-        <button type="button" id="lang-ta" aria-pressed="false">தமிழ்</button>
-        <button type="button" id="lang-si" aria-pressed="false">සිංහල</button>
+      <div class="lang" role="group" aria-label="Medium">
+        <button type="button" id="med-all" aria-pressed="true" title="All mediums">All</button>
+        <button type="button" id="med-en" aria-pressed="false" title="English medium">EN</button>
+        <button type="button" id="med-ta" aria-pressed="false" title="Tamil medium">தமிழ்</button>
+        <button type="button" id="med-si" aria-pressed="false" title="Sinhala medium">සිංහල</button>
       </div>
       <a class="btn small" data-join href="https://whatsapp.com/channel/0029VamYa7D6xCSPUPuZzS1J" target="_blank" rel="noopener" data-i="joinShort">Join channel</a>
     </div>
@@ -345,7 +346,7 @@ body { background: transparent; }
     <a class="back" href="index.html" data-i="back">← All subjects</a>
     <p class="eyebrow">GEN</p>
     <h1 data-i="gen">General</h1>
-    <p class="lede"><b id="p-count"></b> <span data-i="resWord">resources</span></p>
+    <p class="lede"><b id="p-count"></b> <span data-i="resWord">resources</span> <span id="p-med"></span></p>
   </div>
   <section class="block"><div class="wrap"><div class="filters" id="jump"></div><div id="lib"></div></div></section>
   <section class="block"><div class="wrap"><div class="final">
@@ -1166,6 +1167,16 @@ Inorganic past paper essay review|EN|f|1w7Vf0MDeDKo7u5iFpHB6zGAdKqbgWo8k
 Kinetics MCQ review|EN|f|1RigOQ4lRp0oHxIp41ojQQDZFrNnfz9WL
 Organic · 300 conversions|EN|f|1lvpccXaaVhRy0GzFlNRq1_pyKNtrvTFp`);
 
+  var MED = "all";
+  var MED_NAME = { all: "All mediums", en: "English medium", ta: "Tamil medium", si: "Sinhala medium" };
+  function vis(it) { return MED === "all" || !it.m || it.m.toLowerCase().split("\u00b7").indexOf(MED) >= 0; }
+  function refreshCounts() {
+    var tot = 0; RES.forEach(function (s) { tot += countOf(s.id); });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-count]"), function (el) { el.textContent = countOf(el.getAttribute("data-count")); });
+    var sn = document.getElementById("st-n"); if (sn) sn.textContent = tot + "+";
+    var pc = document.getElementById("p-count"); if (pc) pc.textContent = countOf(PAGE);
+    var pm = document.getElementById("p-med"); if (pm) pm.textContent = "\u00b7 " + MED_NAME[MED];
+  }
   var libFilter = "all";
 
   function mk(tag, cls, text) {
@@ -1195,15 +1206,16 @@ Organic · 300 conversions|EN|f|1lvpccXaaVhRy0GzFlNRq1_pyKNtrvTFp`);
       h.appendChild(mk("span", "code", s.code));
       sb.appendChild(h);
       s.groups.forEach(function (g, gi) {
+        var gv = g.items.filter(vis); if (!gv.length) return;
         var gr = mk("div", "group"); var ct = catOf(g.t.en); gr.setAttribute("data-cat", ct.k);
         gr.id = "g-" + s.id + "-" + gi;
         var gh = mk("div", "ghead");
         gh.appendChild(mk("span", "gico", ct.i));
         gh.appendChild(mk("h4", null, g.t[lang]));
-        gh.appendChild(mk("span", "gcount", String(g.items.length)));
+        gh.appendChild(mk("span", "gcount", String(gv.length)));
         gr.appendChild(gh);
-        var list = mk("div", "items"); if (g.items.length >= 6 && g.items.every(function (it) { return it.n.en.length <= 24; })) list.className = "items tiles";
-        g.items.forEach(function (it) {
+        var list = mk("div", "items"); if (gv.length >= 6 && gv.every(function (it) { return it.n.en.length <= 24; })) list.className = "items tiles";
+        gv.forEach(function (it) {
           var a = mk("div", "item");
           a.appendChild(mk("span", "ico", it.k === "folder" ? "\uD83D\uDCC1" : "\uD83D\uDCC4"));
           var txt = mk("span", "txt");
@@ -1226,12 +1238,14 @@ Organic · 300 conversions|EN|f|1lvpccXaaVhRy0GzFlNRq1_pyKNtrvTFp`);
       if (jump) {
         jump.textContent = "";
         s.groups.forEach(function (g, gi) {
+          if (!g.items.some(vis)) return;
           var a = mk("a", "chip", catOf(g.t.en).i + " " + g.t[lang]); a.setAttribute("data-cat", catOf(g.t.en).k);
           a.href = "#g-" + s.id + "-" + gi;
           jump.appendChild(a);
         });
       }
     });
+    if (!root.querySelector(".group")) root.appendChild(mk("p", "soon", "No resources in this medium yet. Try another medium."));
     applyFilter();
   }
   Array.prototype.forEach.call(document.querySelectorAll(".chip"), function (c) {
@@ -1265,25 +1279,26 @@ Organic · 300 conversions|EN|f|1lvpccXaaVhRy0GzFlNRq1_pyKNtrvTFp`);
   }
 
   function setLang(next) {
-    lang = next;
-    var T = I18N[lang];
-    document.documentElement.lang = lang;
+    MED = next; lang = "en";
+    var T = I18N.en;
+    document.documentElement.lang = "en";
     Array.prototype.forEach.call(document.querySelectorAll("[data-i]"), function (el) {
       var key = el.getAttribute("data-i");
       if (T[key] !== undefined) el.textContent = T[key];
     });
     var stEl = document.getElementById("strata"); if (stEl) stEl.setAttribute("aria-label", T.strataAria);
-    ["en", "ta", "si"].forEach(function (code) {
-      document.getElementById("lang-" + code).setAttribute("aria-pressed", lang === code ? "true" : "false");
+    ["all", "en", "ta", "si"].forEach(function (code) {
+      document.getElementById("med-" + code).setAttribute("aria-pressed", MED === code ? "true" : "false");
     });
-    try { localStorage.setItem("dos-lang", lang); } catch (e) {}
+    try { localStorage.setItem("dos-med", MED); } catch (e) {}
     renderLibrary();
+    refreshCounts();
     update();
   }
 
-  document.getElementById("lang-en").addEventListener("click", function () { setLang("en"); });
-  document.getElementById("lang-ta").addEventListener("click", function () { setLang("ta"); });
-  document.getElementById("lang-si").addEventListener("click", function () { setLang("si"); });
+  ["all", "en", "ta", "si"].forEach(function (code) {
+    document.getElementById("med-" + code).addEventListener("click", function () { setLang(code); });
+  });
   window.addEventListener("scroll", function () {
     if (!ticking) { ticking = true; requestAnimationFrame(update); }
   }, { passive: true });
@@ -1291,10 +1306,10 @@ Organic · 300 conversions|EN|f|1lvpccXaaVhRy0GzFlNRq1_pyKNtrvTFp`);
 
   Object.assign(I18N.en, {
     eyebrow: "A/L Science · Free · WhatsApp channel", h1: "Dive deep into A/L Science.",
-    lede: "Free notes, past papers and tutes for Biology, Chemistry, Physics, Maths and ICT. In English, Tamil and Sinhala.",
+    lede: "Free notes, past papers and tutes for Biology, Chemistry, Physics, Maths and ICT. For English, Tamil and Sinhala medium students.",
     seeSubjects: "Browse resources", subH: "Choose your subject.",
     subIntro: "Every subject has its own page, sorted into notes, past papers, tutes and more.",
-    statRes: "resources", statLang: "languages", statFreeB: "Free", statFree: "for everyone",
+    statRes: "resources", statLang: "mediums", statFreeB: "Free", statFree: "for everyone",
     home: "Home", gen: "General", back: "← All subjects", resWord: "resources"
   });
   Object.assign(I18N.ta, {
@@ -1314,7 +1329,7 @@ Organic · 300 conversions|EN|f|1lvpccXaaVhRy0GzFlNRq1_pyKNtrvTFp`);
     home: "මුල් පිටුව", gen: "පොදු", back: "← සියලු විෂයන්", resWord: "සම්පත්"
   });
   var total = 0;
-  function countOf(id) { var n = 0; RES.forEach(function (s) { if (s.id === id) s.groups.forEach(function (g) { n += g.items.length; }); }); return n; }
+  function countOf(id) { var n = 0; RES.forEach(function (s) { if (s.id === id) s.groups.forEach(function (g) { n += g.items.filter(vis).length; }); }); return n; }
   RES.forEach(function (s) { total += countOf(s.id); });
   Array.prototype.forEach.call(document.querySelectorAll("[data-count]"), function (el) { el.textContent = countOf(el.getAttribute("data-count")); });
   var stN = document.getElementById("st-n"); if (stN) stN.textContent = total + "+";
@@ -1323,13 +1338,10 @@ Organic · 300 conversions|EN|f|1lvpccXaaVhRy0GzFlNRq1_pyKNtrvTFp`);
     if (a.getAttribute("data-p") === PAGE) a.setAttribute("aria-current", "page");
   });
 
-  var start = "en";
+  var start = "all";
   try {
-    var saved = localStorage.getItem("dos-lang");
-    var nav = (navigator.language || "").toLowerCase();
-    if (saved === "en" || saved === "ta" || saved === "si") start = saved;
-    else if (nav.indexOf("ta") === 0) start = "ta";
-    else if (nav.indexOf("si") === 0) start = "si";
+    var saved = localStorage.getItem("dos-med");
+    if (saved === "all" || saved === "en" || saved === "ta" || saved === "si") start = saved;
   } catch (e) {}
   setLang(start);
 
