@@ -68,7 +68,7 @@ a{color:var(--ac)}.hide{display:none}
   async function putFile(p, content64, msg, sha) {
     var body = { message: msg, content: content64, branch: cfg.branch }; if (sha) body.sha = sha;
     var r = await fetch(url(p), { method: "PUT", headers: hdr(), body: JSON.stringify(body) });
-    if (!r.ok) throw new Error("Could not save " + p + " (" + r.status + ")");
+    if (!r.ok) throw new Error(r.status === 403 || r.status === 404 ? "Token cannot write to this repo (" + r.status + "). Edit the token: Repository access = Depth-Of-Science-, Contents = Read and write. Then tap Save & connect again." : "Could not save " + p + " (" + r.status + ")");
   }
   async function delFile(p) {
     var f = await getFile(p); if (!f) return;
