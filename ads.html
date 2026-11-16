@@ -376,7 +376,7 @@ body[data-page="ads"] { --accent: #e11d48; --accent-fg: #fff; }
 .ad h3 { font-family: var(--font-display); font-size: 1.28rem; line-height: 1.3; margin: 0 0 6px; }
 .ad .meta { color: var(--muted); font-size: .92rem; margin-bottom: 8px; }
 .ad .desc { margin: 0; line-height: 1.6; white-space: pre-line; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
-.ad .desc.open { display: block; }
+
 .ad .more { background: none; border: 0; color: var(--cc, var(--accent)); font-weight: 700; padding: 6px 0 0; cursor: pointer; font-size: .9rem; }
 .ad .foot { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
 .ad .wa { font-weight: 700; text-decoration: none; color: #fff; background: #16a34a; border-radius: 999px; padding: 9px 16px; }
@@ -394,6 +394,7 @@ body[data-page="ads"] { --accent: #e11d48; --accent-fg: #fff; }
 .lightbox img { max-width: 96vw; max-height: 88vh; border-radius: 10px; }
 #lbx { position: absolute; top: 14px; right: 14px; width: 44px; height: 44px; border-radius: 50%; border: 0; background: #fff; color: #000; font-size: 1.2rem; cursor: pointer; }
 </style>
+<style id="ads-css3">.ad .desc { display: block !important; overflow: visible !important; -webkit-line-clamp: unset !important; white-space: pre-line; }</style>
 </head>
 <body class="sub" data-page="ads">
 
@@ -1655,6 +1656,19 @@ Theory notes|EN|d|1bM9gnKj4ElzBgqWpaQtMjShvBO55h2mm`);
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !so.hidden) closeS(); });
   var sp = document.getElementById("splash");
   if (sp) { try { if (sessionStorage.getItem("dos-splash")) sp.remove(); else sessionStorage.setItem("dos-splash", "1"); } catch (e) {} }
+  fetch("resources.json?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : []; }).then(function (list) {
+    if (!list || !list.length || typeof RES === "undefined") return;
+    var changed = false;
+    list.slice().reverse().forEach(function (x) {
+      var s = RES.filter(function (q) { return q.id === x.s; })[0];
+      if (!s) { s = { id: x.s, nameKey: SK[x.s], name: L(SN[x.s]), code: SC[x.s], groups: [] }; RES.push(s); }
+      for (var i = 0; i < s.groups.length; i++) for (var j = 0; j < s.groups[i].items.length; j++) if (s.groups[i].items[j].u === x.u) return;
+      var g = s.groups.filter(function (q) { return q.t.en === x.g; })[0];
+      if (!g) { g = { t: L(x.g), items: [] }; s.groups.unshift(g); }
+      g.items.unshift({ n: L(x.n), m: x.m, k: x.k === "d" ? "folder" : "file", u: x.u }); changed = true;
+    });
+    if (changed) { renderLibrary(); refreshCounts(); if (window.reveal) reveal(); }
+  }).catch(function () {});
 })();
 </script>
 <script type="application/json" id="ads-seed">[
@@ -1722,7 +1736,6 @@ Theory notes|EN|d|1bM9gnKj4ElzBgqWpaQtMjShvBO55h2mm`);
     }
     if (a.text) {
       var ds = mk2("p", "desc", a.text); c.appendChild(ds);
-      if (a.text.length > 220) { var b = mk2("button", "more", "Read more"); b.type = "button"; b.addEventListener("click", function () { var o = ds.classList.toggle("open"); b.textContent = o ? "Show less" : "Read more"; }); c.appendChild(b); }
     }
     var digits = a.contact.replace(/\D/g, ""), f = mk2("div", "foot");
     if (digits.length >= 9) {

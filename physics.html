@@ -1618,6 +1618,19 @@ Theory notes|EN|d|1bM9gnKj4ElzBgqWpaQtMjShvBO55h2mm`);
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !so.hidden) closeS(); });
   var sp = document.getElementById("splash");
   if (sp) { try { if (sessionStorage.getItem("dos-splash")) sp.remove(); else sessionStorage.setItem("dos-splash", "1"); } catch (e) {} }
+  fetch("resources.json?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : []; }).then(function (list) {
+    if (!list || !list.length || typeof RES === "undefined") return;
+    var changed = false;
+    list.slice().reverse().forEach(function (x) {
+      var s = RES.filter(function (q) { return q.id === x.s; })[0];
+      if (!s) { s = { id: x.s, nameKey: SK[x.s], name: L(SN[x.s]), code: SC[x.s], groups: [] }; RES.push(s); }
+      for (var i = 0; i < s.groups.length; i++) for (var j = 0; j < s.groups[i].items.length; j++) if (s.groups[i].items[j].u === x.u) return;
+      var g = s.groups.filter(function (q) { return q.t.en === x.g; })[0];
+      if (!g) { g = { t: L(x.g), items: [] }; s.groups.unshift(g); }
+      g.items.unshift({ n: L(x.n), m: x.m, k: x.k === "d" ? "folder" : "file", u: x.u }); changed = true;
+    });
+    if (changed) { renderLibrary(); refreshCounts(); if (window.reveal) reveal(); }
+  }).catch(function () {});
 })();
 </script>
 </body>
