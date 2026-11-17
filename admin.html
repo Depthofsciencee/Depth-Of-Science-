@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex"><meta name="theme-color" content="#0b6cff"><title>Ads Admin · Depth of Science</title>
+<meta name="robots" content="noindex"><meta name="theme-color" content="#0b6cff"><link rel="manifest" href="admin.webmanifest"><link rel="apple-touch-icon" href="admin-icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<title>Ads Admin · Depth of Science</title>
 <style>
 :root{color-scheme:light dark;--bg:#f4f8fb;--card:#fff;--fg:#0f2230;--mut:#5b7183;--line:#d6e1ea;--ac:#0b6cff}
 @media(prefers-color-scheme:dark){:root{--bg:#07131b;--card:#0e2230;--fg:#e8f3fa;--mut:#8fa8b9;--line:#1d3647}}
@@ -18,9 +20,9 @@ button.g{background:var(--line);color:var(--fg)}button.d{background:#e11d48}butt
 .ad img{width:56px;height:56px;object-fit:cover;border-radius:10px;background:var(--line);flex:none}.ad .t{flex:1;min-width:0}
 .ad b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ad small{color:var(--mut)}
 .pv{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.pv img{width:72px;height:72px;object-fit:cover;border-radius:10px}
-a{color:var(--ac)}.hide{display:none}.brow{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;margin-top:10px}.brow button{padding:10px 14px}
+a{color:var(--ac)}.hide{display:none}.brow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}.brow>:first-child{grid-column:1/-1}.brow>button{grid-column:1/-1;justify-self:start;padding:8px 18px}
 </style></head><body><div class="w">
-<h1>📢 Ads Admin</h1><div style="color:var(--mut)">Post or delete ads. Only you can, with your token.</div>
+<h1>📢 Ads Admin</h1><p style="margin:8px 0"><button id="inst" class="hide">📲 Install as app</button></p><div style="color:var(--mut)">Post or delete ads. Only you can, with your token.</div>
 
 <div class="card" id="login">
   <h2>🔑 Connect</h2>
@@ -83,8 +85,14 @@ a{color:var(--ac)}.hide{display:none}.brow{display:grid;grid-template-columns:1f
   }
   async function putFile(p, content64, msg, sha) {
     var body = { message: msg, content: content64, branch: cfg.branch }; if (sha) body.sha = sha;
-    var r = await fetch(url(p), { method: "PUT", headers: hdr(), body: JSON.stringify(body) });
-    if (!r.ok) throw new Error(r.status === 403 || r.status === 404 ? "Token cannot write to this repo (" + r.status + "). Edit the token: Repository access = Depth-Of-Science-, Contents = Read and write. Then tap Save & connect again." : "Could not save " + p + " (" + r.status + ")");
+    for (var tryNo = 0; tryNo < 2; tryNo++) {
+      var r = await fetch(url(p), { method: "PUT", headers: hdr(), body: JSON.stringify(body) });
+      if (r.ok) return;
+      var gm = ""; try { gm = (await r.json()).message || ""; } catch (e) {}
+      if (r.status === 403 && /rate limit/i.test(gm) && tryNo === 0) { await new Promise(function (ok) { setTimeout(ok, 5000); }); continue; }
+      var hint = /rate limit/i.test(gm) ? " Wait 1 minute and try again." : (r.status === 403 || r.status === 404 ? " (If this keeps happening: token needs Contents = Read and write for this repository.)" : "");
+      throw new Error("Could not save " + p + " (" + r.status + "): " + gm + hint);
+    }
   }
   async function delFile(p) {
     var f = await getFile(p); if (!f) return;
@@ -201,7 +209,7 @@ a{color:var(--ac)}.hide{display:none}.brow{display:grid;grid-template-columns:1f
     var r = document.createElement("div"); r.className = "brow";
     function f(lab, type, val, k) { var w = document.createElement("div"), l = document.createElement("label"), i = document.createElement("input"); l.textContent = lab; i.type = type; i.value = val || ""; i.setAttribute("data-k", k); w.appendChild(l); w.appendChild(i); return w; }
     r.appendChild(f("Batch", "text", b.name, "name")); r.appendChild(f("First paper", "date", b.start, "start")); r.appendChild(f("Last paper", "date", b.end, "end"));
-    var x = document.createElement("button"); x.className = "d"; x.textContent = "\u2715"; x.addEventListener("click", function () { r.remove(); }); r.appendChild(x); $("bl").appendChild(r);
+    var x = document.createElement("button"); x.className = "d"; x.textContent = "Remove"; x.addEventListener("click", function () { r.remove(); }); r.appendChild(x); $("bl").appendChild(r);
   }
   async function showBatches() { try { var d = await readJson("batches.json", DEFB); bsha = d.sha; $("bl").textContent = ""; d.data.forEach(brow); } catch (e) { say("bmsg", e.message, false); } }
   $("badd").addEventListener("click", function () { brow({ name: "", start: "", end: "" }); });
@@ -210,6 +218,11 @@ a{color:var(--ac)}.hide{display:none}.brow{display:grid;grid-template-columns:1f
     say("bmsg", "Saving\u2026", true);
     try { var cur = await readJson("batches.json", DEFB); await writeJson("batches.json", out, cur.sha, "Update exam dates"); say("bmsg", "\u2705 Saved. Home page updates in about a minute.", true); } catch (e) { say("bmsg", e.message, false); }
   });
+  var dip = null;
+  window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); dip = e; $("inst").classList.remove("hide"); });
+  $("inst").addEventListener("click", function () { if (dip) { dip.prompt(); dip = null; $("inst").classList.add("hide"); } });
+  window.addEventListener("appinstalled", function () { $("inst").classList.add("hide"); });
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("admin-sw.js", { scope: "./" }).catch(function () {});
   if (cfg && cfg.token) show();
 })();
 </script></body></html>
