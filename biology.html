@@ -362,6 +362,19 @@ body[data-page="ict"] { --accent: #0d9488; --accent-fg: #fff; } body[data-page="
 .subnav #sopen { position: sticky; left: 0; z-index: 3; }
 .sbar input::-webkit-search-cancel-button { display: none; }
 </style>
+<style id="ui9">
+#jump { display: none !important; }
+#libbar { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 16px; scrollbar-width: none; }
+#libbar .chip { flex: none; }
+.ghead { cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
+.chev { flex: none; font-size: 1.3rem; line-height: 1; color: var(--muted); transition: transform .2s ease; }
+.group.col .chev { transform: rotate(-90deg); }
+.group.col .items { display: none; }
+.group.col .ghead { border-bottom-color: transparent; }
+.group.col { padding-bottom: 0; }
+.group:not(.col) .items { animation: pagein .3s ease both; }
+.group { margin-top: 14px; }
+</style>
 </head>
 <body class="sub" data-page="bio">
 
@@ -1397,6 +1410,102 @@ Theory notes|EN|d|1bM9gnKj4ElzBgqWpaQtMjShvBO55h2mm`);
     s.groups = s.groups.filter(function (g) { return g.items.length; });
   });
 
+
+  // ---- round 7 resources
+  add("bio", "English medium · past papers 2016 – 2022", `
+2016|EN|f|1ALHZ4eKoLd8eo6CVRTyCEOOgp7_VM6wk
+2017|EN|f|1PHgq35xD-3WizCQhJIRQiN3uqec4RJw7
+2018|EN|f|1iM3GwONAb8cCR8rqTogpvL-aA2zjbFx1
+2019|EN|f|19yEkedmIFEoQ2P8GHN6U4gcggoFUXFnS
+2020|EN|f|1BXORPE-LfWaDg1esH7i6Bm5bcpjcW2qI
+2021|EN|f|1BMqxLPDurTonDM8Hwmxjg0r1EI9rbrux
+2022 · MCQ|EN|f|1Rcycf8SDeXOk6QtnEwjcPFPUELIU06FO
+2022 · Essay|EN|f|1XATTgOz_E6GCy6e-nuRSFa17IoGviGeq`);
+  add("bio", "Tamil medium · model papers, schemes & short notes", `
+All Biology folder|TA|d|1-Cax71dGk957qDbgGDowxgLgFyrc5-oB
+Model papers|TA|d|1-oF0vbJm9fOfn2y2gkcmYsEmwU6mlm_R
+Past papers|TA|d|1-jOC0KXnf_IKt89UOAgINAuMQRtaC9Tu
+Schemes|TA|d|1-m7hMswd3QtW_VcOxuud2yYWrD2iqAuc
+Short notes|TA|d|1-hz5voOIomO3tGp1tSh9b1gaNw-pwWVT`);
+  add("bio", "2024 papers · English medium", `
+2024 Part 1 (MCQ)|EN|f|19IjvgK4MyDcYwfd3t5G73MPgwVH8hP7X
+2024 Essay|EN|f|139caV5ONzaTNtC47LovAmeAKhYeUptaX`);
+  add("bio", "Royal College papers", `
+Royal College · Biology||d|18UvE2Sy4G8z1r3pxmrrXjLeCFe5sIfzw
+2024 Biology paper||f|1WebEgVehWWWSh5u3PEDWhSbPr0O69QhD`);
+  add("chem", "Tamil medium · model papers, schemes & short notes", `
+All Chemistry folder|TA|d|1-DQ6hJs7FUF7wpjo9ZFMrokjcH7GXc6y
+Model papers|TA|d|108R2wpMx9TyETl130c333xC0Ned2577u
+Past papers|TA|d|10B-0SBD8IHxXpkj3IeQLCya8SHVxJEYt
+Schemes|TA|d|10DcW6K-qYnOSV5HftExAVL86f9oh_dn1
+Short notes|TA|d|1056miyio1cZ7VzELeyqIN46KIgCMtyM-`);
+  add("chem", "Splash notes · Geeth Hewavitharana", `
+Chemical calculation splash||d|1_GjNmjtGH0jceZu3fz4i0Xxud-6QoiDG
+Gas splash||d|1T3PSdlWEiNjEQ5NflE7XyBgDLmpgNTT8
+Inorganic splash||d|1pSAvkZ7GJTbHqVuEN5vcGKoHS1W4kPTY
+Kinetic splash||d|1XY2KlUMmezHUHnobuegot3L17Vg_-YCE
+Organic splash||d|1ohXYQLhjoMaYj3ffAhvXh71udVClnojX
+Physical splash||d|1NosF8THHzKePqA0lh9PjHfwPQeYgxfQu
+Splash notes · extra file||f|1maJ1DjCa8XBkuWk72Egl8tR2cZHxCm_h`);
+  add("chem", "Tamil medium · topic notes & discussions", `
+Anion qualitative analysis|TA|f|16UWqxLhT-xw_3sLQ5q54TmwZ9ezZEd5X
+Chemical kinetics notes|TA|f|1T5WS0FaS5VswifMCAIkCyKwpvQ6R-FW-
+Energetics · theory & paper discussion|TA|f|1ekVKs0k24hgUWJ_DBpoWGNaI_DR27t1V
+Gas past paper 1|TA|f|1JqILUZO2u2Wa5kP3p2XV0x05AYhN8NJj
+Hybridization|TA|f|1S5Vp-RNtA9VFBmfXVGxcD-J0WspHb4NX
+Industrial notes 1|TA|f|1Ali6DNOvxcaeFCkp4INMPnJXDXM97-mK
+Inorganic 1|TA|f|1lTShuUhLfJVS7gnIjv91JEipUBB5xiFm
+Inorganic short notes|TA|f|1Cbhd-kslexj2ri0xAuLuBRazgFcfOQO-
+Inorganic|TA|f|1-Bt_kRMpKrGfy8lS0eTLKukfggGOmoIO
+Kinetics exam 1|TA|f|1J5Y7dSo_ymW9f82jWUla9GQfhd8tswGF
+Lewis structure|TA|f|1zd6hxnED6Wb4rQ4gEAu8UewzGh6z4sKQ
+p-block notes & past paper MCQ discussion|TA|f|12TWETrsoHhBVr7zE7CJqF9A3f9Lc1lwL
+Unit 9 · conversions|TA|f|1mptvR0Rvq6g5UR0wSR3Qmi2wayDvpY_k
+Unit 4 · gaseous state past paper|TA|f|1IeW0k9kVEXfmKR7Hos6_XpONVyd-HGkj
+Unit 1 · theory & paper discussion|TA|f|1yKMUx10NyjEphfQTNMfeI8y-SDk6OOdZ
+s-block notes|TA|f|1eUqXbOumWiZErFxQTqwEKsErci2GtbfW
+Physical chemistry|TA|f|16f8HDoicjTJ4yZWX0M5s6o2wOcG4EVpy`);
+  add("chem", "Royal College papers", `
+Royal College · Chemistry||d|1hTGFtZzvt0QcR_gyG3gXQvVCkKQCBGve
+2024 Chemistry paper||f|1H465jvSKerCC-xUl01hiSFvxzs9UuEC8`);
+  add("phy", "Tamil medium · FWC, model papers, schemes & short notes", `
+All Physics folder|TA|d|1-N55gyvb_TgAzdhSyrT0vNUsOwclpdkL
+FWC|TA|d|10STw7-n2QgejDNdvv5qCkPbrdAbcrfsT
+Model papers|TA|d|1-aF4TIs3-UitUd3rxSfPjk6QY-tq70ev
+Past papers|TA|d|1-WgAHuOe0aydJMfqf6nd4ezbm22VRIPb
+Scheme|TA|d|1-Wqm-lGcnOqmO2_2-my3rrChMEZpwvS3
+Short notes|TA|d|1-SzL0rWO3V36nOSGvHEpUMKva24jurn7`);
+  add("phy", "Royal College papers", `
+Royal College · Physics||d|1EIdFP5o1UbY5T7ZLWaRztvbjKuA2dY33
+2024 Physics paper||f|1LgwhiuYigCxfIVIU1WutzXeB3W5pDmKG
+2024 Physics scheme||f|1jUDy9ctBgh5wNrdlcPVmpzM_MIS8h3be`);
+  add("maths", "Pure Maths · Tamil medium", `
+Circulation|TA|f|1s1dsYm_wAsS9RtEMsFPXNgTXeUoIRV1k
+Series|TA|f|1q5X1rgkkaMpTnCv1MYEVN7ZB19nxWX_T
+Determinants|TA|f|1NVKGZHXpnm3CxXdhIi_wK6zNBtCVlwQQ
+Matrices|TA|f|1z0OvHK27Fj3izsUwmPWPBLJf5KGwFXo9
+Trigonometry (1)|TA|f|1ZG6vwvzT3g7vV36VFwK4ZfcaFFGFloUn
+Trigonometry (2)|TA|f|1Kh_pBodL2edZzpszQpXFViAEd9k4QBrd
+Calculus|TA|f|1Obh_N1Bzfso9y74xAzJgdIj-jCW6eVMB
+Quadratic functions (irupaadi saarpugal)|TA|f|19L9jY0dPo9ARxwPE9oQOK_eT8JfDiqUR
+Quadratic equations (irupaadi samanpaadu)|TA|f|1RQ3dgih86rH1YLePnoAytUz6PmVS7hdm
+Complex numbers|TA|f|1fo5PGu2jDvTIuRYCZWC1vEItnwaaL3Bw
+Inequalities|TA|f|1VhnQ8QuBoKhutRCqlmzbguk5-Ks5b8fB
+Meethithottam|TA|f|1iDR9Wgdxaaz8vQ11YppiaEpBkm8uLqhW`);
+  add("maths", "Applied Maths · Tamil medium", `
+Relative velocity|TA|f|1pHl8KhRDg-X0E29Ak88Xb-eq7tyFKYza
+Projectiles|TA|f|1lM0yz7_BlL_OBPWre1ImIUirCIgHx6Zz
+Statistics|TA|f|1hRALGDK8DRJw9IiEjubYvFbUMffBJ82Z
+Work, power & energy|TA|f|12fj-UveSoL25Gp6n0BH2OZl1i8vyqCen
+Coplanar forces (oru thala visaigal)|TA|f|1nuE2jXgOPLmic6yBxwFOk1tYj7RAUGEa
+Circular motion|TA|f|1QDAOyugqYEvB2L_m-P5be5e09tJ6evIZ
+Friction|TA|f|1diqhbds7TA5ivlSvYP7GlLttyBiBAJSo
+Impact|TA|f|1ip4kl7zKr6EhNG7jfD0w_ut_88SF5wps
+Simple harmonic motion|TA|f|16mFtG_FhO9UsSZtLdxQ6h1WZwhq42saN`);
+  add("maths", "Royal College 2024 papers", `
+Applied Maths paper||f|1QF0wxffP91Zxoji1AXY_jFCLGwTCmAts
+Pure Maths paper||f|11Q5E6NYAR4tpykCqf_Ua5qZ6HSV5VYRT`);
+
   var libFilter = "all";
 
   function mk(tag, cls, text) {
@@ -1591,6 +1700,34 @@ Theory notes|EN|d|1bM9gnKj4ElzBgqWpaQtMjShvBO55h2mm`);
     var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { threshold: 0.08 });
     for (i = 0; i < gs.length; i++) io.observe(gs[i]);
   };
+  var curCat = "all", CATL = { notes: "\uD83D\uDCDD Notes", paper: "\uD83D\uDCC4 Papers", book: "\uD83D\uDCDA Books", ques: "\u2753 Questions", prac: "\uD83E\uDDEA Practical", diag: "\uD83D\uDDBC\uFE0F Diagrams", info: "\uD83D\uDCCA Info" };
+  function decorate() {
+    var lib = document.getElementById("lib"); if (!lib) return;
+    var gs = lib.querySelectorAll(".group"), bar = document.getElementById("libbar"), counts = {}, total = gs.length, i, k;
+    if (!bar) { bar = document.createElement("div"); bar.id = "libbar"; lib.parentNode.insertBefore(bar, lib); }
+    for (i = 0; i < total; i++) { k = gs[i].getAttribute("data-cat") || "book"; counts[k] = (counts[k] || 0) + gs[i].querySelectorAll(".item").length; }
+    if (curCat !== "all" && !counts[curCat]) curCat = "all";
+    Array.prototype.forEach.call(gs, function (g, idx) {
+      if (!g.getAttribute("data-dec")) {
+        g.setAttribute("data-dec", "1"); var h = g.querySelector(".ghead"), ch = document.createElement("span");
+        ch.className = "chev"; ch.textContent = "\u25BE"; h.appendChild(ch); h.setAttribute("role", "button"); h.tabIndex = 0;
+        var tg = function () { h.setAttribute("aria-expanded", g.classList.toggle("col") ? "false" : "true"); };
+        h.addEventListener("click", tg); h.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tg(); } });
+        if (total > 5 && idx > 0) g.classList.add("col");
+        h.setAttribute("aria-expanded", g.classList.contains("col") ? "false" : "true");
+      }
+      g.style.display = (curCat === "all" || (g.getAttribute("data-cat") || "book") === curCat) ? "" : "none";
+    });
+    bar.textContent = ""; if (total < 4) return;
+    function mkb(label, key) { var b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = label; b.setAttribute("aria-pressed", curCat === key ? "true" : "false"); b.addEventListener("click", function () { curCat = key; decorate(); }); return b; }
+    var all = 0; for (k in counts) all += counts[k];
+    bar.appendChild(mkb("All \u00b7 " + all, "all"));
+    Object.keys(CATL).forEach(function (c) { if (counts[c]) bar.appendChild(mkb(CATL[c] + " \u00b7 " + counts[c], c)); });
+    var tgl = document.createElement("button"); tgl.type = "button"; tgl.className = "chip"; tgl.textContent = "\u21C5 Open / close all";
+    tgl.addEventListener("click", function () { var list = lib.querySelectorAll(".group"), anyOpen = false, j; for (j = 0; j < list.length; j++) if (list[j].style.display !== "none" && !list[j].classList.contains("col")) anyOpen = true; for (j = 0; j < list.length; j++) list[j].classList.toggle("col", anyOpen); });
+    bar.appendChild(tgl);
+  }
+  var _rv = window.reveal; window.reveal = function () { decorate(); _rv(); };
   window.reveal();
   document.addEventListener("pointerdown", function (e) {
     var t = e.target.closest && e.target.closest(".open,.btn,.chip,.subject,.subnav a,.lang button,.item"); if (!t) return;

@@ -362,6 +362,19 @@ body[data-page="ict"] { --accent: #0d9488; --accent-fg: #fff; } body[data-page="
 .subnav #sopen { position: sticky; left: 0; z-index: 3; }
 .sbar input::-webkit-search-cancel-button { display: none; }
 </style>
+<style id="ui9">
+#jump { display: none !important; }
+#libbar { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 16px; scrollbar-width: none; }
+#libbar .chip { flex: none; }
+.ghead { cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
+.chev { flex: none; font-size: 1.3rem; line-height: 1; color: var(--muted); transition: transform .2s ease; }
+.group.col .chev { transform: rotate(-90deg); }
+.group.col .items { display: none; }
+.group.col .ghead { border-bottom-color: transparent; }
+.group.col { padding-bottom: 0; }
+.group:not(.col) .items { animation: pagein .3s ease both; }
+.group { margin-top: 14px; }
+</style>
 </head>
 <body class="sub" data-page="gen">
 
@@ -1591,6 +1604,34 @@ Theory notes|EN|d|1bM9gnKj4ElzBgqWpaQtMjShvBO55h2mm`);
     var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { threshold: 0.08 });
     for (i = 0; i < gs.length; i++) io.observe(gs[i]);
   };
+  var curCat = "all", CATL = { notes: "\uD83D\uDCDD Notes", paper: "\uD83D\uDCC4 Papers", book: "\uD83D\uDCDA Books", ques: "\u2753 Questions", prac: "\uD83E\uDDEA Practical", diag: "\uD83D\uDDBC\uFE0F Diagrams", info: "\uD83D\uDCCA Info" };
+  function decorate() {
+    var lib = document.getElementById("lib"); if (!lib) return;
+    var gs = lib.querySelectorAll(".group"), bar = document.getElementById("libbar"), counts = {}, total = gs.length, i, k;
+    if (!bar) { bar = document.createElement("div"); bar.id = "libbar"; lib.parentNode.insertBefore(bar, lib); }
+    for (i = 0; i < total; i++) { k = gs[i].getAttribute("data-cat") || "book"; counts[k] = (counts[k] || 0) + gs[i].querySelectorAll(".item").length; }
+    if (curCat !== "all" && !counts[curCat]) curCat = "all";
+    Array.prototype.forEach.call(gs, function (g, idx) {
+      if (!g.getAttribute("data-dec")) {
+        g.setAttribute("data-dec", "1"); var h = g.querySelector(".ghead"), ch = document.createElement("span");
+        ch.className = "chev"; ch.textContent = "\u25BE"; h.appendChild(ch); h.setAttribute("role", "button"); h.tabIndex = 0;
+        var tg = function () { h.setAttribute("aria-expanded", g.classList.toggle("col") ? "false" : "true"); };
+        h.addEventListener("click", tg); h.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tg(); } });
+        if (total > 5 && idx > 0) g.classList.add("col");
+        h.setAttribute("aria-expanded", g.classList.contains("col") ? "false" : "true");
+      }
+      g.style.display = (curCat === "all" || (g.getAttribute("data-cat") || "book") === curCat) ? "" : "none";
+    });
+    bar.textContent = ""; if (total < 4) return;
+    function mkb(label, key) { var b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = label; b.setAttribute("aria-pressed", curCat === key ? "true" : "false"); b.addEventListener("click", function () { curCat = key; decorate(); }); return b; }
+    var all = 0; for (k in counts) all += counts[k];
+    bar.appendChild(mkb("All \u00b7 " + all, "all"));
+    Object.keys(CATL).forEach(function (c) { if (counts[c]) bar.appendChild(mkb(CATL[c] + " \u00b7 " + counts[c], c)); });
+    var tgl = document.createElement("button"); tgl.type = "button"; tgl.className = "chip"; tgl.textContent = "\u21C5 Open / close all";
+    tgl.addEventListener("click", function () { var list = lib.querySelectorAll(".group"), anyOpen = false, j; for (j = 0; j < list.length; j++) if (list[j].style.display !== "none" && !list[j].classList.contains("col")) anyOpen = true; for (j = 0; j < list.length; j++) list[j].classList.toggle("col", anyOpen); });
+    bar.appendChild(tgl);
+  }
+  var _rv = window.reveal; window.reveal = function () { decorate(); _rv(); };
   window.reveal();
   document.addEventListener("pointerdown", function (e) {
     var t = e.target.closest && e.target.closest(".open,.btn,.chip,.subject,.subnav a,.lang button,.item"); if (!t) return;
