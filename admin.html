@@ -50,6 +50,17 @@ a{color:var(--ac)}.hide{display:none}.brow{display:grid;grid-template-columns:1f
   </div>
   <div class="card"><h2>📋 Current ads</h2><div id="list">Loading…</div><div class="msg" id="dmsg"></div></div>
   <div class="card">
+    <h2>📰 Post an update</h2>
+    <div style="color:var(--mut);font-size:.9rem">Shows at the top of the home page as "NEW" and in "What's new".</div>
+    <label>Heading</label><input id="uh">
+    <label>Text</label><textarea id="ut"></textarea>
+    <label>Photos (optional, up to 4)</label><input id="up" type="file" accept="image/*" multiple><div class="pv" id="upv"></div>
+    <label>Link (optional, https://)</label><input id="ul">
+    <label style="display:flex;gap:10px;align-items:center;color:var(--fg);font-size:1rem;margin-top:14px"><input id="ui" type="checkbox" style="width:22px;height:22px">📌 Important (pin on top)</label>
+    <p style="margin:14px 0 0"><button id="upost">Post update</button> <button class="g hide" id="ucancel" type="button">Cancel edit</button></p><div class="msg" id="umsg"></div>
+  </div>
+  <div class="card"><h2>🗂️ Updates on the website</h2><div id="ulist">Loading…</div><div class="msg" id="udmsg"></div></div>
+  <div class="card">
     <h2>📚 Add resources</h2>
     <div class="row"><div><label>Subject</label><select id="rs"><option value="bio">Biology</option><option value="chem">Chemistry</option><option value="phy">Physics</option><option value="maths">Combined Maths</option><option value="ict">ICT</option><option value="gen">General</option></select></div>
     <div><label>Medium</label><select id="rm"><option value="EN">English</option><option value="TA">Tamil</option><option value="SI">Sinhala</option><option value="TA·EN">Tamil + English</option><option value="">Not stated</option></select></div></div>
@@ -107,7 +118,7 @@ a{color:var(--ac)}.hide{display:none}.brow{display:grid;grid-template-columns:1f
   async function saveAds(ads, sha) { await putFile("ads.json", b64(JSON.stringify(ads, null, 1)), "Update ads", sha); }
   async function show() {
     $("login").classList.add("hide"); $("app").classList.remove("hide");
-    showRes(); showBatches();
+    showRes(); showBatches(); showUps();
     try {
       var d = await loadAds(), box = $("list"); box.textContent = "";
       if (!d.ads.length) box.textContent = "No ads yet.";
@@ -204,6 +215,12 @@ a{color:var(--ac)}.hide{display:none}.brow{display:grid;grid-template-columns:1f
     } catch (e) { say("rmsg", e.message, false); }
     btn.disabled = false;
   });
+
+  async function loadUps() {
+    var f = await getFile("updates.json", true); if (f) return { sha: f.sha, data: JSON.parse(f.text) };
+    var h = await (await fetch("index.html?t=" + Date.now())).text(), el = new DOMParser().parseFromString(h, "text/html").getElementById("upd-seed");
+    return { sha: null, data: el ? JSON.parse(el.textContent) : [] };
+  }
   var DEFB = [{ name: "2027 A/L", start: "2027-08-03", end: "2027-08-28" }, { name: "2028 A/L", start: "", end: "" }, { name: "2029 A/L", start: "", end: "" }], bsha = null;
   function brow(b) {
     var r = document.createElement("div"); r.className = "brow";
@@ -218,11 +235,61 @@ a{color:var(--ac)}.hide{display:none}.brow{display:grid;grid-template-columns:1f
     say("bmsg", "Saving\u2026", true);
     try { var cur = await readJson("batches.json", DEFB); await writeJson("batches.json", out, cur.sha, "Update exam dates"); say("bmsg", "\u2705 Saved. Home page updates in about a minute.", true); } catch (e) { say("bmsg", e.message, false); }
   });
+
   var dip = null;
   window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); dip = e; $("inst").classList.remove("hide"); });
   $("inst").addEventListener("click", function () { if (dip) { dip.prompt(); dip = null; $("inst").classList.add("hide"); } });
   window.addEventListener("appinstalled", function () { $("inst").classList.add("hide"); });
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("admin-sw.js", { scope: "./" }).catch(function () {});
+
+  var ufiles = [], editing = null;
+  async function showUps() {
+    try {
+      var d = await loadUps(), box = $("ulist"); box.textContent = ""; if (!d.data.length) box.textContent = "No updates yet.";
+      d.data.forEach(function (u) {
+        var row = document.createElement("div"), f0 = Array.isArray(u.img) ? u.img[0] : u.img; row.className = "ad";
+        var im = document.createElement("img"); if (f0) im.src = f0; row.appendChild(im);
+        var t = document.createElement("div"); t.className = "t"; var b = document.createElement("b"); b.textContent = (u.important ? "\uD83D\uDCCC " : "") + u.title; var sm = document.createElement("small"); sm.textContent = u.date; t.appendChild(b); t.appendChild(sm); row.appendChild(t);
+        var e = document.createElement("button"); e.className = "g"; e.textContent = "Edit"; e.addEventListener("click", function () { startEdit(u); }); row.appendChild(e);
+        var x = document.createElement("button"); x.className = "d"; x.textContent = "Delete"; x.addEventListener("click", function () { delUp(u); }); row.appendChild(x); box.appendChild(row);
+      });
+    } catch (e) { say("udmsg", e.message, false); }
+  }
+  function startEdit(u) {
+    editing = u; $("uh").value = u.title; $("ut").value = u.text || ""; $("ul").value = u.link || ""; $("ui").checked = !!u.important;
+    $("upost").textContent = "Save changes"; $("ucancel").classList.remove("hide"); say("umsg", "Editing. Choose new photos only if you want to replace the old ones.", true); $("uh").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+  function resetUp() { editing = null; ["uh", "ut", "ul"].forEach(function (k) { $(k).value = ""; }); $("ui").checked = false; $("up").value = ""; $("upv").textContent = ""; ufiles = []; $("upost").textContent = "Post update"; $("ucancel").classList.add("hide"); }
+  $("ucancel").addEventListener("click", function () { resetUp(); say("umsg", "", true); });
+  $("up").addEventListener("change", function () { ufiles = Array.prototype.slice.call(this.files, 0, 4); $("upv").textContent = ""; ufiles.forEach(function (f) { var i = document.createElement("img"); i.src = URL.createObjectURL(f); $("upv").appendChild(i); }); });
+  async function delUp(u) {
+    if (!confirm("Delete this update?\n\n" + u.title)) return; say("udmsg", "Deleting\u2026", true);
+    try {
+      var d = await loadUps(); await writeJson("updates.json", d.data.filter(function (x) { return x.id !== u.id; }), d.sha, "Remove update");
+      var imgs = !u.img ? [] : (Array.isArray(u.img) ? u.img : [u.img]); for (var i = 0; i < imgs.length; i++) { try { if (/^up-/.test(imgs[i])) await delFile(imgs[i]); } catch (e) {} }
+      say("udmsg", "Deleted. Website updates in about a minute.", true); showUps();
+    } catch (e) { say("udmsg", e.message, false); }
+  }
+  $("upost").addEventListener("click", async function () {
+    var title = $("uh").value.trim(); if (!title) return say("umsg", "Heading is required.", false);
+    var btn = this; btn.disabled = true; say("umsg", "Saving\u2026 please wait", true);
+    try {
+      var names = [], stamp = Date.now();
+      for (var i = 0; i < ufiles.length; i++) { var n = "up-" + stamp + "-" + (i + 1) + ".jpg"; await putFile(n, await shrink(ufiles[i]), "Add " + n); names.push(n); }
+      var d = await loadUps(), now = new Date(), pad = function (k) { return String(k).padStart(2, "0"); };
+      if (editing) {
+        var u = d.data.filter(function (x) { return x.id === editing.id; })[0];
+        if (u) { u.title = title; u.text = $("ut").value.trim(); u.important = $("ui").checked; u.link = $("ul").value.trim();
+          if (names.length) { var old = !u.img ? [] : (Array.isArray(u.img) ? u.img : [u.img]); u.img = names; for (var j = 0; j < old.length; j++) { try { if (/^up-/.test(old[j])) await delFile(old[j]); } catch (e) {} } } }
+      } else {
+        d.data.unshift({ id: "up-" + stamp, date: now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate()), title: title, text: $("ut").value.trim(), important: $("ui").checked, link: $("ul").value.trim(), img: names });
+      }
+      await writeJson("updates.json", d.data, d.sha, "Update news");
+      say("umsg", "\u2705 Saved! It will show on the home page in about a minute.", true); resetUp(); showUps();
+    } catch (e) { say("umsg", e.message, false); }
+    btn.disabled = false;
+  });
+
   if (cfg && cfg.token) show();
 })();
 </script></body></html>

@@ -385,33 +385,31 @@ body[data-page="ict"] { --accent: #0d9488; --accent-fg: #fff; } body[data-page="
 .group:not(.col) .items { animation: pagein .3s ease both; }
 .group { margin-top: 14px; }
 </style>
-<style id="news-css">
-.newbar { display: flex; align-items: center; gap: 10px; margin: 12px 0 0; padding: 10px 12px 10px 14px; border-radius: 999px; background: linear-gradient(90deg, #e11d48, #f97316); color: #fff; text-decoration: none; font-weight: 600; font-size: .92rem; box-shadow: 0 6px 20px rgba(225,29,72,.3); animation: pagein .5s ease both; }
-.newbar[hidden] { display: none; }
-.newbar .dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #fff; animation: ping 1.4s ease-out infinite; }
-.newbar b { flex: none; font-family: var(--font-mono); font-size: .72rem; letter-spacing: .06em; background: rgba(255,255,255,.22); border-radius: 99px; padding: 3px 9px; }
-.newbar .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.newbar .x { flex: none; width: 28px; height: 28px; border: 0; border-radius: 50%; background: rgba(255,255,255,.22); color: #fff; cursor: pointer; padding: 0; }
-@keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,.75); } 100% { box-shadow: 0 0 0 10px rgba(255,255,255,0); } }
-.newslist { display: grid; gap: 16px; margin-top: 18px; }
-.upd { background: var(--panel); border: 1px solid var(--line); border-left: 6px solid var(--accent); border-radius: 18px; padding: 16px 18px; animation: pagein .5s ease both; }
-.upd.imp { border-color: #f59e0b; border-left-color: #f59e0b; background: color-mix(in srgb, #f59e0b 12%, var(--panel)); }
-.upd .top { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
-.upd .tg { font-family: var(--font-mono); font-size: .74rem; font-weight: 700; border-radius: 999px; padding: 3px 10px; color: #fff; background: var(--accent); }
-.upd.imp .tg { background: #f59e0b; color: #1a1200; }
-.upd .when { margin-left: auto; font-family: var(--font-mono); font-size: .78rem; color: var(--muted); }
-.upd h3 { font-family: var(--font-display); font-size: 1.3rem; line-height: 1.3; margin: 0 0 8px; }
-.upd p { margin: 0; line-height: 1.65; white-space: pre-line; }
-.upd .pics { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin: 4px 0 12px; }
-.upd .pics img { width: 100%; height: auto; max-height: 440px; object-fit: cover; border-radius: 12px; cursor: zoom-in; display: block; background: var(--line); }
-.upd .pics.one img { object-fit: contain; }
-.upd .lk { display: inline-block; margin-top: 12px; font-weight: 700; text-decoration: none; color: var(--accent); border: 1.5px solid var(--accent); border-radius: 999px; padding: 8px 16px; }
-#newsmore { display: block; margin: 18px auto 0; }
-.nlb { position: fixed; inset: 0; z-index: 120; background: rgba(0,0,0,.92); display: grid; place-items: center; }
-.nlb[hidden] { display: none; }
-.nlb img { max-width: 96vw; max-height: 88vh; border-radius: 10px; }
-.nlb button { position: absolute; top: 14px; right: 14px; width: 44px; height: 44px; border-radius: 50%; border: 0; background: #fff; color: #000; font-size: 1.2rem; cursor: pointer; }
+<style id="up-css">
+.upbar[hidden], #whatsnew[hidden], .ulb[hidden] { display: none !important; }
+.upbar { display: flex; align-items: center; gap: 10px; margin: 12px 0 0; padding: 8px 8px 8px 12px; border-radius: 999px; background: linear-gradient(90deg, color-mix(in srgb, #e11d48 22%, var(--panel)), var(--panel)); border: 1px solid color-mix(in srgb, #e11d48 45%, var(--line)); cursor: pointer; animation: pagein .5s ease both; }
+.upbar .pill { flex: none; font-family: var(--font-mono); font-size: .72rem; font-weight: 800; letter-spacing: .06em; color: #fff; background: #e11d48; border-radius: 999px; padding: 4px 10px; animation: upulse 1.8s ease-in-out infinite; }
+.upbar .txt { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.upbar .go { flex: none; font-weight: 700; color: #e11d48; }
+.upbar .x { flex: none; width: 30px; height: 30px; border-radius: 50%; border: 0; background: var(--line); color: var(--fg); cursor: pointer; padding: 0; }
+@keyframes upulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(225,29,72,.5); } 50% { box-shadow: 0 0 0 7px rgba(225,29,72,0); } }
+.unlist { display: grid; gap: 14px; margin-top: 16px; }
+.un { background: var(--panel); border: 1px solid var(--line); border-left: 6px solid var(--accent); border-radius: 18px; padding: 16px 18px; }
+.un.imp { border-left-color: #e11d48; background: color-mix(in srgb, #e11d48 8%, var(--panel)); }
+.un.flash { animation: unflash 1.6s ease; }
+@keyframes unflash { 0%, 60% { box-shadow: 0 0 0 4px rgba(225,29,72,.45); } 100% { box-shadow: 0 0 0 0 rgba(225,29,72,0); } }
+.un .meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 6px; font-family: var(--font-mono); font-size: .78rem; color: var(--muted); }
+.un .tagi { font-weight: 800; color: #fff; background: #e11d48; border-radius: 999px; padding: 3px 10px; }
+.un h3 { font-family: var(--font-display); font-size: 1.3rem; line-height: 1.3; margin: 0 0 8px; }
+.un p { margin: 0; line-height: 1.65; white-space: pre-line; }
+.un img { width: 100%; height: auto; max-height: 520px; object-fit: contain; border-radius: 12px; margin: 4px 0 12px; cursor: zoom-in; background: var(--line); display: block; }
+.un .lk { display: inline-block; margin-top: 12px; font-weight: 700; text-decoration: none; color: #fff; background: var(--accent); border-radius: 999px; padding: 9px 16px; }
+#unmore { display: block; margin: 16px auto 0; }
+.ulb { position: fixed; inset: 0; z-index: 120; background: rgba(0,0,0,.92); display: grid; place-items: center; }
+.ulb img { max-width: 96vw; max-height: 88vh; border-radius: 10px; }
+#ulbx { position: absolute; top: 14px; right: 14px; width: 44px; height: 44px; border-radius: 50%; border: 0; background: #fff; color: #000; font-size: 1.2rem; cursor: pointer; }
 </style>
+<style id="up-css2">.un .unimgs { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin: 6px 0 12px; } .un .unimgs img { width: 100%; max-height: 420px; object-fit: cover; border-radius: 12px; cursor: zoom-in; display: block; margin: 0; } .un .unimgs.one img { object-fit: contain; max-height: 520px; }</style>
 </head>
 <body data-page="home">
 
@@ -447,7 +445,13 @@ body[data-page="ict"] { --accent: #0d9488; --accent-fg: #fff; } body[data-page="
 <nav class="wrap subnav" aria-label="Subjects"><button type="button" class="sbtn" id="sopen" aria-label="Search resources">🔍</button><a href="index.html" data-p="home" data-i="home">Home</a><a href="biology.html" data-p="bio" data-i="s1">Biology</a><a href="chemistry.html" data-p="chem" data-i="s2">Chemistry</a><a href="physics.html" data-p="phy" data-i="s3">Physics</a><a href="maths.html" data-p="maths" data-i="s4">Combined Maths</a><a href="ict.html" data-p="ict" data-i="s5">ICT</a><a href="general.html" data-p="gen" data-i="gen">General</a><a href="ads.html" data-p="ads">📢 Ads</a></nav>
 </header>
 <main id="top">
-  <div class="wrap"><a class="newbar" id="newbar" href="#newsfeed" hidden><span class="dot"></span><b>NEW UPDATE</b><span class="t" id="newbart"></span><span aria-hidden="true">›</span><button type="button" class="x" id="newbarx" aria-label="Dismiss">✕</button></a></div>
+  <div class="wrap"><div class="upbar" id="upbar" role="button" tabindex="0" hidden><span class="pill">NEW</span><span class="txt" id="uptxt"></span><span class="go">View →</span><button type="button" class="x" id="upx" aria-label="Dismiss">✕</button></div></div>
+  
+  
+  
+  
+  
+  
     <div class="wrap hero">
     <div class="hero-grid">
       <div>
@@ -476,17 +480,16 @@ body[data-page="ict"] { --accent: #0d9488; --accent-fg: #fff; } body[data-page="
     </div>
   </div>
 
-  <section class="block" id="newsfeed" hidden>
+  <div class="nlb" id="nlb" hidden><button type="button" id="nlbx" aria-label="Close">✕</button><img id="nlbimg" alt=""></div>
+  <section class="block" id="search"></section>
+  <section class="block" id="whatsnew" hidden>
     <div class="wrap">
-      <p class="depth-tag">Latest</p>
-      <h2>📰 Latest updates</h2>
-      <div class="newslist" id="newslist"></div>
-      <button type="button" class="btn ghost" id="newsmore" hidden>Show more</button>
+      <p class="depth-tag">Updates</p>
+      <h2>📰 What’s new</h2>
+      <div class="unlist" id="unlist"></div>
+      <button type="button" class="btn ghost" id="unmore" hidden>Show older updates</button>
     </div>
   </section>
-  <div class="nlb" id="nlb" hidden><button type="button" id="nlbx" aria-label="Close">✕</button><img id="nlbimg" alt=""></div>
-  <section class="block" id="search"><div class="wrap">
-</div></section>
   <section class="block" id="subjects">
     <div class="wrap">
       <p class="depth-tag" data-i="subTag">Subjects</p>
@@ -518,21 +521,6 @@ body[data-page="ict"] { --accent: #0d9488; --accent-fg: #fff; } body[data-page="
         <div class="format"><h3 data-i="m6n">Practice questions</h3><p data-i="m6d">Extra learning materials to test yourself.</p></div>
       </div>
       <p class="langs" data-i="langsNote">Material is shared in English, Tamil and Sinhala.</p>
-    </div>
-  </section>
-
-  <section class="block" id="updates">
-    <div class="wrap">
-      <p class="depth-tag" data-i="updTag">Stay updated</p>
-      <h2 data-i="updH">More than study material.</h2>
-      <p class="intro" data-i="updIntro">Follow the channel for the updates that matter to A/L students.</p>
-      <ul class="updates">
-        <li data-i="u1">Exam timetables</li>
-        <li data-i="u2">Educational opportunities</li>
-        <li data-i="u3">Competitions and challenges</li>
-        <li data-i="u4">Announcements</li>
-        <li data-i="u5">Doubt support</li>
-      </ul>
     </div>
   </section>
 
@@ -1848,38 +1836,63 @@ Theory notes|EN|d|1bM9gnKj4ElzBgqWpaQtMjShvBO55h2mm`);
   setInterval(function () { draw(cur); }, 3600000);
 })();
 </script>
-<script id="news-js">
+<div class="ulb" id="ulb" hidden><button type="button" id="ulbx" aria-label="Close">✕</button><img id="ulbimg" alt=""></div>
+<script type="application/json" id="upd-seed">[
+ {
+  "id": "seed-up-1",
+  "date": "2026-11-18",
+  "title": "New: notice board, search & exam countdown",
+  "important": false,
+  "text": "📢 Ads page for announcements\n🔍 Search that understands similar words\n⏳ A/L exam countdown at the bottom of this page\n🗂️ Sections open and close, with a Papers / Notes / Books filter\n🌐 Filter everything by medium (EN / தமிழ் / සිංහල)",
+  "img": "",
+  "link": ""
+ }
+]</script>
+<script id="up-js">
 (function () {
-  var bar = document.getElementById("newbar"), feed = document.getElementById("newsfeed"), list = document.getElementById("newslist"), more = document.getElementById("newsmore"), shown = 0, ups = [], SIZE = 4;
-  function mk(tag, cls, t) { var e = document.createElement(tag); if (cls) e.className = cls; if (t !== undefined) e.textContent = t; return e; }
-  function ago(d) { var dd = (Date.now() - d) / 864e5; if (dd < 1) return "Today"; if (dd < 2) return "Yesterday"; if (dd < 30) return Math.floor(dd) + " days ago"; return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }); }
+  var box = document.getElementById("unlist"), bar = document.getElementById("upbar"), sec = document.getElementById("whatsnew"), more = document.getElementById("unmore"); if (!box) return;
+  var seed = []; try { seed = JSON.parse(document.getElementById("upd-seed").textContent); } catch (e) {}
+  function e(tag, cls, t) { var x = document.createElement(tag); if (cls) x.className = cls; if (t !== undefined) x.textContent = t; return x; }
+  function fmt(s) { return new Date(s + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }); }
+  var ordered = [], shown = 4;
   function card(u) {
-    var c = mk("article", "upd" + (u.important ? " imp" : "")), top = mk("div", "top");
-    top.appendChild(mk("span", "tg", u.important ? "\uD83D\uDCCC Important" : "Update")); top.appendChild(mk("span", "when", ago(u.d))); c.appendChild(top);
-    c.appendChild(mk("h3", "", u.title));
-    var imgs = !u.img ? [] : (typeof u.img === "string" ? [u.img] : u.img);
-    if (imgs.length) { var box = mk("div", "pics" + (imgs.length === 1 ? " one" : "")); imgs.forEach(function (f) { var im = mk("img"); im.src = f; im.alt = u.title; im.loading = "lazy"; im.addEventListener("click", function () { document.getElementById("nlbimg").src = f; document.getElementById("nlb").hidden = false; }); box.appendChild(im); }); c.appendChild(box); }
-    if (u.text) c.appendChild(mk("p", "", u.text));
-    if (/^https:\/\//.test(u.link || "")) { var a = mk("a", "lk", "Open \u2197"); a.href = u.link; a.target = "_blank"; a.rel = "noopener"; c.appendChild(a); }
+    var c = e("article", "un" + (u.important ? " imp" : "")); c.id = "u-" + u.id;
+    var m = e("div", "meta"); if (u.important) m.appendChild(e("span", "tagi", "\uD83D\uDCCC IMPORTANT")); m.appendChild(e("span", "", fmt(u.date))); c.appendChild(m);
+    c.appendChild(e("h3", "", u.title));
+    var imgs = !u.img ? [] : (Array.isArray(u.img) ? u.img : [u.img]);
+    if (imgs.length) {
+      var gal = e("div", "unimgs" + (imgs.length === 1 ? " one" : ""));
+      imgs.forEach(function (f) { var im = e("img"); im.src = f; im.alt = u.title; im.loading = "lazy"; im.addEventListener("click", function () { document.getElementById("ulbimg").src = f; document.getElementById("ulb").hidden = false; }); gal.appendChild(im); });
+      c.appendChild(gal);
+    }
+    if (u.text) c.appendChild(e("p", "", u.text));
+    if (/^https:\/\//.test(u.link || "")) { var a = e("a", "lk", "Open \u2197"); a.href = u.link; a.target = "_blank"; a.rel = "noopener"; c.appendChild(a); }
     return c;
   }
-  function render() { var next = ups.slice(shown, shown + SIZE); next.forEach(function (u) { list.appendChild(card(u)); }); shown += next.length; more.hidden = shown >= ups.length; }
-  more.addEventListener("click", render);
-  document.getElementById("nlb").addEventListener("click", function () { this.hidden = true; });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") document.getElementById("nlb").hidden = true; });
-  fetch("updates.json?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : []; }).then(function (arr) {
-    ups = (arr || []).filter(function (u) { return u && u.title; }).map(function (u) { u.d = new Date((u.date || "") + "T00:00:00"); return u; });
-    if (!ups.length) return;
-    var byDate = ups.slice().sort(function (a, b) { return b.d - a.d; }), latest = byDate[0], seen = "";
-    ups.sort(function (a, b) { return (b.important ? 1 : 0) - (a.important ? 1 : 0) || b.d - a.d; });
-    feed.hidden = false; render();
-    try { seen = localStorage.getItem("dos-seen-update") || ""; } catch (e) {}
-    if (Date.now() - latest.d < 7 * 864e5 && seen !== latest.id) {
-      document.getElementById("newbart").textContent = latest.title; bar.hidden = false;
-      var mark = function () { try { localStorage.setItem("dos-seen-update", latest.id); } catch (e) {} };
-      bar.addEventListener("click", function (e) { if (e.target.id === "newbarx") { e.preventDefault(); bar.hidden = true; } mark(); });
+  function paint() { box.textContent = ""; ordered.slice(0, shown).forEach(function (u) { box.appendChild(card(u)); }); more.hidden = ordered.length <= shown; }
+  function draw(list) {
+    list = (list || []).filter(function (u) { return u && u.title; });
+    if (!list.length) { sec.hidden = true; bar.hidden = true; return; }
+    var latest = list.slice().sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; })[0];
+    ordered = list.slice().sort(function (a, b) { return (b.important ? 1 : 0) - (a.important ? 1 : 0) || (a.date < b.date ? 1 : a.date > b.date ? -1 : 0); });
+    sec.hidden = false; paint();
+    var seen = ""; try { seen = localStorage.getItem("dos-up-seen") || ""; } catch (x) {}
+    var age = (Date.now() - new Date(latest.date + "T00:00:00")) / 864e5;
+    if (seen !== latest.id && age < 21) {
+      document.getElementById("uptxt").textContent = latest.title; bar.hidden = false;
+      function mark() { try { localStorage.setItem("dos-up-seen", latest.id); } catch (x) {} }
+      function go() {
+        mark(); bar.hidden = true; var idx = ordered.indexOf(latest); if (idx >= shown) { shown = idx + 1; paint(); }
+        var t = document.getElementById("u-" + latest.id); if (t) { t.scrollIntoView({ behavior: "smooth", block: "center" }); t.classList.add("flash"); }
+      }
+      bar.onclick = go; bar.onkeydown = function (ev) { if (ev.key === "Enter") go(); };
+      document.getElementById("upx").onclick = function (ev) { ev.stopPropagation(); mark(); bar.hidden = true; };
     }
-  }).catch(function () {});
+  }
+  more.addEventListener("click", function () { shown += 4; paint(); });
+  var lb = document.getElementById("ulb"); lb.addEventListener("click", function () { lb.hidden = true; });
+  document.addEventListener("keydown", function (ev) { if (ev.key === "Escape") lb.hidden = true; });
+  fetch("updates.json?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(draw).catch(function () { draw(seed); });
 })();
 </script>
 </body>
