@@ -375,6 +375,43 @@ body[data-page="ict"] { --accent: #0d9488; --accent-fg: #fff; } body[data-page="
 .group:not(.col) .items { animation: pagein .3s ease both; }
 .group { margin-top: 14px; }
 </style>
+<style id="med-css">
+html { --mc: #64748b; }
+html[data-med="en"] { --mc: #2563eb; } html[data-med="ta"] { --mc: #d97706; } html[data-med="si"] { --mc: #059669; }
+header { border-bottom: 3px solid var(--mc) !important; transition: border-color .35s; }
+header::after { display: none; text-align: center; background: var(--mc); color: #fff; font: 700 .7rem/1 var(--font-mono, monospace); letter-spacing: .08em; padding: 5px 10px; }
+html[data-med="en"] header::after { display: block; content: "ENGLISH MEDIUM"; }
+html[data-med="ta"] header::after { display: block; content: "தமிழ் மொழிமூலம் · TAMIL MEDIUM"; }
+html[data-med="si"] header::after { display: block; content: "සිංහල මාධ්‍යය · SINHALA MEDIUM"; }
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; transition: background .5s;
+  background: radial-gradient(900px 520px at 85% -8%, color-mix(in srgb, var(--mc) 22%, transparent), transparent 70%), radial-gradient(700px 480px at -10% 45%, color-mix(in srgb, var(--mc) 13%, transparent), transparent 70%); }
+#med-en[aria-pressed="true"] { background: #2563eb; color: #fff; } #med-ta[aria-pressed="true"] { background: #d97706; color: #fff; } #med-si[aria-pressed="true"] { background: #059669; color: #fff; }
+.lang { border-color: color-mix(in srgb, var(--mc) 60%, var(--line)) !important; }
+.logo { filter: drop-shadow(0 0 10px color-mix(in srgb, var(--mc) 55%, transparent)); }
+.group { border-top: 3px solid color-mix(in srgb, var(--mc) 50%, transparent); }
+.badge[data-m="en"] { color: #2563eb !important; border-color: #2563eb !important; background: rgba(37,99,235,.10); }
+.badge[data-m="ta"] { color: #d97706 !important; border-color: #d97706 !important; background: rgba(217,119,6,.12); }
+.badge[data-m="si"] { color: #059669 !important; border-color: #059669 !important; background: rgba(5,150,105,.12); }
+.badge[data-m="mix"] { color: #7c3aed !important; border-color: #7c3aed !important; background: rgba(124,58,237,.10); }
+main.medswap { animation: medswap .45s ease both; }
+@keyframes medswap { from { opacity: .25; transform: translateY(12px) scale(.985); } }
+</style>
+<style id="ui11">
+html[data-med="en"] body { --accent: #2563eb; --accent-fg: #fff; }
+html[data-med="ta"] body { --accent: #d97706; --accent-fg: #fff; }
+html[data-med="si"] body { --accent: #059669; --accent-fg: #fff; }
+html[data-med="en"] { background: color-mix(in srgb, #2563eb 7%, var(--bg)); }
+html[data-med="ta"] { background: color-mix(in srgb, #d97706 8%, var(--bg)); }
+html[data-med="si"] { background: color-mix(in srgb, #059669 7%, var(--bg)); }
+.medbox { display: flex; align-items: center; gap: 14px; margin-top: 14px; padding: 14px 16px; border-radius: 18px; background: linear-gradient(120deg, color-mix(in srgb, var(--mc) 22%, var(--panel)), var(--panel)); border: 1px solid color-mix(in srgb, var(--mc) 55%, var(--line)); box-shadow: 0 8px 28px color-mix(in srgb, var(--mc) 20%, transparent); animation: pagein .4s ease both; }
+.medbox .ml { flex: none; width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; background: var(--mc); color: #fff; font-size: 1.8rem; font-weight: 800; line-height: 1; }
+.medbox .mt { flex: 1; min-width: 0; }
+.medbox .mt b { display: block; font-family: var(--font-display); font-size: 1.2rem; }
+.medbox .mt small { display: block; color: var(--muted); font-size: .85rem; margin-top: 2px; }
+.medbox button { flex: none; border: 0; border-radius: 99px; padding: 8px 14px; background: var(--mc); color: #fff; font-weight: 700; cursor: pointer; }
+.medflash { position: fixed; inset: 0; z-index: 150; pointer-events: none; background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--mc) 55%, transparent), transparent 65%); animation: medfl .8s ease-out forwards; }
+@keyframes medfl { from { opacity: 1; } to { opacity: 0; } }
+</style>
 </head>
 <body class="sub" data-page="chem">
 
@@ -1250,6 +1287,8 @@ Organic · 300 conversions|EN|f|1lvpccXaaVhRy0GzFlNRq1_pyKNtrvTFp`);
     var sn = document.getElementById("st-n"); if (sn) sn.textContent = tot + "+";
     var pc = document.getElementById("p-count"); if (pc) pc.textContent = countOf(PAGE);
     var pm = document.getElementById("p-med"); if (pm) pm.textContent = "\u00b7 " + MED_NAME[MED];
+    var sr = document.getElementById("st-res");
+    if (sr) { sr.textContent = countOf(PAGE); var ng = 0; RES.forEach(function (x) { if (x.id === PAGE) x.groups.forEach(function (g) { if (g.items.some(vis)) ng++; }); }); document.getElementById("st-grp").textContent = ng; document.getElementById("st-med").textContent = { all: "All", en: "English", ta: "Tamil", si: "Sinhala" }[MED]; }
   }
   var EQ = [["paper","ppr","pprs","pp","exam"],["note","tute","tutorial","handwritten"],["mcq","objective"],["essay","eq","seq","structured"],["pesuru","pesaru","classified"],["chem","chemistry","chemical"],["phy","physic"],["bio"],["math","mathematic","combined","cm"],["ict","git","computer"],["marking","scheme","answer","key"],["practical","prac","lab"],["book","resource","reference","guide"],["mora","moratuwa"],["tamil","ta","tm"],["english","en","em"],["sinhala","si","sm"],["review","revision","recap"],["model","final"],["unit","chapter"]];
   var STOP = { medium: 1, the: 1, of: 1, for: 1, and: 1, a: 1, in: 1, to: 1, me: 1, show: 1 };
@@ -1768,6 +1807,28 @@ Pure Maths paper||f|11Q5E6NYAR4tpykCqf_Ua5qZ6HSV5VYRT`);
     });
     if (changed) { renderLibrary(); refreshCounts(); if (window.reveal) reveal(); }
   }).catch(function () {});
+  function applyMed(anim) {
+    document.documentElement.setAttribute("data-med", typeof MED === "undefined" ? "all" : MED);
+    medUI(anim);
+    if (anim) { var m = document.querySelector("main"); if (m) { m.classList.remove("medswap"); void m.offsetWidth; m.classList.add("medswap"); } }
+  }
+  function tagBadges() { Array.prototype.forEach.call(document.querySelectorAll(".badge:not([data-m])"), function (b) { var t = b.textContent.trim(); b.setAttribute("data-m", t.indexOf("\u00b7") >= 0 ? "mix" : t.toLowerCase()); }); }
+  if (typeof window.setLang === "function") { var _sl = window.setLang; window.setLang = function (n) { _sl(n); applyMed(true); tagBadges(); }; }
+  applyMed(false); tagBadges();
+  var _bt; new MutationObserver(function () { clearTimeout(_bt); _bt = setTimeout(tagBadges, 40); }).observe(document.body, { childList: true, subtree: true });
+  function medUI(anim) {
+    var m = typeof MED === "undefined" ? "all" : MED, main = document.querySelector("main"), holder = document.getElementById("medtag");
+    if (!holder && main) { holder = document.createElement("div"); holder.id = "medtag"; holder.className = "wrap"; main.insertBefore(holder, main.firstChild); }
+    if (!holder) return; holder.textContent = "";
+    if (m !== "all") {
+      var D = { en: ["A", "English medium", "Showing only English medium resources."], ta: ["\u0B85", "Tamil medium", "Showing only Tamil medium resources."], si: ["\u0D85", "Sinhala medium", "Showing only Sinhala medium resources."] }[m];
+      var box = document.createElement("div"), l = document.createElement("div"), t = document.createElement("div"), b = document.createElement("b"), s = document.createElement("small"), x = document.createElement("button");
+      box.className = "medbox"; l.className = "ml"; l.textContent = D[0]; t.className = "mt"; b.textContent = D[1]; s.textContent = D[2]; t.appendChild(b); t.appendChild(s);
+      x.type = "button"; x.textContent = "Show all"; x.addEventListener("click", function () { document.getElementById("med-all").click(); });
+      box.appendChild(l); box.appendChild(t); box.appendChild(x); holder.appendChild(box);
+    }
+    if (anim && m !== "all") { var f = document.createElement("div"); f.className = "medflash"; document.body.appendChild(f); setTimeout(function () { f.remove(); }, 800); }
+  }
 })();
 </script>
 </body>
