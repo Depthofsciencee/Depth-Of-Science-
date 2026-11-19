@@ -1,16 +1,5 @@
 [
  {
-  "id": "up-1795068042112",
-  "date": "2026-11-19",
-  "title": "What's New",
-  "text": "O/L exam",
-  "important": true,
-  "link": "",
-  "img": [
-   "up-1795068042112-1.jpg"
-  ]
- },
- {
   "id": "seed-up-1",
   "date": "2026-11-18",
   "title": "New: notice board, search & exam countdown",
